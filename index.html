@@ -2,242 +2,380 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>裝備模擬器</title>
+    <title>裝備能力加總模擬器</title>
     <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            margin: 0;
             display: flex;
             height: 100vh;
-            font-family: '微軟正黑體', sans-serif;
+            font-family: '微軟正黑體', 'Noto Sans TC', sans-serif;
             background-color: #1a1a1a;
             color: white;
+            overflow: hidden;
         }
 
-        /* 左側控制列 */
+        /* ── Sidebar ── */
         .sidebar {
             width: 220px;
-            background-color: #252525;
+            background-color: #202020;
             padding: 20px;
-            border-right: 1px solid #333;
+            border-right: 1px solid #2e2e2e;
             flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
+        .sidebar h2 { font-size: 15px; color: #ccc; font-weight: 600; }
+        .stat-box {
+            background: #161616;
+            padding: 14px;
+            border-radius: 10px;
+            border: 1px solid #2e2e2e;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .stat-item { display: flex; justify-content: space-between; font-size: 13px; color: #888; }
+        .stat-value { color: #f0f0f0; font-weight: bold; }
 
-        /* 主畫布 */
+        /* ── Main ── */
         .main-content {
             flex-grow: 1;
-            padding: 50px;
-            position: relative; /* 讓 Tooltip 可以根據此容器定位 */
+            padding: 30px;
+            display: flex;
+            gap: 24px;
+            overflow: hidden;
         }
 
-        /* 3x6 格子系統 */
+        /* ── Grid ── */
         .grid-container {
             display: grid;
-            grid-template-columns: repeat(3, 110px);
-            grid-template-rows: repeat(6, 110px);
-            gap: 15px;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(6, 100px);
+            gap: 12px;
+            flex-shrink: 0;
+            align-content: start;
         }
-
-        /* 格子基礎樣式 */
         .grid-item {
             background-color: #222;
-            border: 2px solid #3d3d3d;
-            border-radius: 12px;
+            border: 2px solid #333;
+            border-radius: 10px;
             cursor: pointer;
             position: relative;
             display: flex;
             justify-content: center;
             align-items: center;
-            transition: all 0.2s;
+            transition: border-color 0.15s, background 0.15s;
+        }
+        .grid-item:hover { border-color: #0060df; background-color: #272727; }
+        .grid-item img { width: 78%; height: 78%; object-fit: contain; display: none; }
+        .slot-label { position: absolute; bottom: 5px; font-size: 10px; color: #555; }
+        .active-slot { border-color: #ffc107 !important; box-shadow: 0 0 8px rgba(255,193,7,0.4); }
+
+        /* ── Detail Panel ── */
+        .detail-panel {
+            width: 260px;
+            flex-shrink: 0;
+            background: #1c1c1c;
+            border: 1px solid #2e2e2e;
+            border-radius: 14px;
+            padding: 20px;
+            display: none;          /* 未選裝備時隱藏 */
+            flex-direction: column;
         }
 
-        .grid-item:hover {
-            border-color: #007bff;
-            background-color: #2a2a2a;
+        .detail-panel h2 {
+            font-size: 18px;
+            color: #eee;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #2e2e2e;
+            flex-shrink: 0;         /* 標題不被壓縮 */
+            margin-bottom: 8px;
         }
 
-        .grid-item img {
-            width: 90%;
-            height: 90%;
-            object-fit: contain;
-            display: none;
-        }
-
-        /* 部位文字標籤 (提示目前這格是什麼部位) */
-        .slot-label {
-            position: absolute;
-            bottom: 5px;
-            font-size: 10px;
-            color: #666;
-        }
-
-        /* 7 號格子簍空 */
-        .grid-item.empty {
-            visibility: hidden;
-            pointer-events: none;
-        }
-
-        /* --- Tooltip 懸浮選單 --- */
-        .equipment-tooltip {
-            display: none; /* 預設隱藏 */
-            position: absolute;
-            background-color: #2a2a2a;
-            border: 1px solid #444;
-            border-radius: 8px;
-            padding: 10px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
-            z-index: 999;
-            grid-template-columns: repeat(2, 60px); /* 兩欄預覽 */
+        /* 三區塊容器：flex 等分上中下 */
+        .enchant-sections {
+            flex: 1;                /* 撐滿剩餘高度 */
+            display: flex;
+            flex-direction: column;
             gap: 8px;
+            min-height: 0;          /* 讓 flex 子項可以正確計算 */
         }
 
-        .tooltip-option {
-            width: 60px;
-            height: 60px;
-            background-color: #333;
-            border: 1px solid #555;
-            border-radius: 4px;
+        /* 每個附魔區塊固定佔 1/3 */
+        .enchant-row {
+            flex: 1;                /* 三個各佔 1/3 */
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 10px 12px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid #2a2a2a;
+            border-radius: 10px;
+        }
+
+        .enchant-label {
+            font-size: 16px;
+            color: #bdbdbd;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            flex-shrink: 0;
+        }
+
+        select {
+            width: 100%;
+            background: #2a2a2a;
+            color: #ddd;
+            border: 1px solid #3a3a3a;
+            padding: 6px 8px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
             cursor: pointer;
-            transition: 0.2s;
+            outline: none;
+            flex-shrink: 0;
         }
+        select:focus { border-color: #555; }
 
-        .tooltip-option:hover {
-            border-color: #007bff;
-            transform: scale(1.1);
+        /* detail card 填滿剩餘空間 */
+        .scroll-card {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            background: rgba(0,0,0,0.2);
+            border: 1px solid #2e2e2e;
+            border-radius: 6px;
+            padding: 8px 10px;
+            /* 無內容時完全透明，有內容時顯示 */
+            opacity: 0;
+            transition: opacity 0.1s;
         }
+        .scroll-card.has-content { opacity: 1; }
 
-        /* 點選格子的發亮效果 */
-        .active-slot {
-            border-color: #ffc107 !important;
-            box-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+        .scroll-title {
+            color: #ffc107;
+            font-size: 12px;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 5px;
         }
-        
+        .attr-list {
+            list-style: none;
+            font-size: 14px;
+            color: #e9cd68;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .attr-list li::before { content: "• "; color: #555; }
+
+        /* ── Tooltip ── */
+        #itemTooltip {
+            position: fixed;
+            background: #252525;
+            border: 1px solid #3a3a3a;
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+            z-index: 999;
+            display: none;
+            flex-wrap: wrap;
+            gap: 8px;
+            max-width: 160px;
+        }
+        .tooltip-option {
+            width: 58px;
+            height: 58px;
+            background: #333;
+            border: 1px solid #444;
+            border-radius: 6px;
+            cursor: pointer;
+            object-fit: contain;
+            padding: 4px;
+            transition: border-color 0.15s, transform 0.15s;
+        }
+        .tooltip-option:hover { border-color: #0060df; transform: scale(1.08); }
     </style>
 </head>
 <body>
 
-    <aside class="sidebar">
-        <h2>裝備配置</h2>
-        <p style="color:#888; font-size: 13px;">點擊格位開啟部位選單</p>
-        <button style="padding:10px; cursor:pointer;" onclick="location.reload()">清空所有裝備</button>
-    </aside>
+<aside class="sidebar">
+    <h2>角色總能力值</h2>
+    <div class="stat-box">
+        <div class="stat-item">攻擊力     <span class="stat-value" id="total-atk">0</span></div>
+        <div class="stat-item">攻擊速度   <span class="stat-value" id="total-speed">0</span></div>
+        <div class="stat-item">暴擊率     <span class="stat-value" id="total-crit">0</span>%</div>
+        <div class="stat-item">平衡       <span class="stat-value" id="total-bal">0</span></div>
+    </div>
+</aside>
 
-    <main class="main-content" id="mainArea">
-        <div class="grid-container" id="gridContainer">
-            <!-- 1號格：指定為頭部 -->
-            <div class="grid-item" data-type="earring" onclick="toggleTooltip(this)">
-                <span class="slot-label">耳環</span>
-                <img src="" class="equipped-img">
+<main class="main-content" id="mainArea">
+
+    <div class="grid-container" id="gridContainer">
+        <div class="grid-item" data-type="earring"  onclick="toggleTooltip(this)"><span class="slot-label">耳環</span><img class="equipped-img"></div>
+        <div class="grid-item" data-type="head"     onclick="toggleTooltip(this)"><span class="slot-label">頭部</span><img class="equipped-img"></div>
+        <div class="grid-item" data-type="necklace" onclick="toggleTooltip(this)"><span class="slot-label">項鍊</span><img class="equipped-img"></div>
+    </div>
+
+    <!-- Detail Panel -->
+    <div id="detailPanel" class="detail-panel">
+        <h2 id="detailName">裝備名稱</h2>
+
+        <div class="enchant-sections">
+
+            <!-- 字首 -->
+            <div class="enchant-row">
+                <span class="enchant-label">字首</span>
+                <select id="topSelect" onchange="applyEnchant('top', this.value)"></select>
+                <div class="scroll-card" id="topDetail"></div>
             </div>
 
-            <!-- 2號格：指定為手部 -->
-            <div class="grid-item" data-type="hand" onclick="toggleTooltip(this)">
-                <span class="slot-label">HAND</span>
-                <img src="" class="equipped-img">
+            <!-- 字尾 -->
+            <div class="enchant-row">
+                <span class="enchant-label">字尾</span>
+                <select id="endSelect" onchange="applyEnchant('end', this.value)"></select>
+                <div class="scroll-card" id="endDetail"></div>
             </div>
 
-            <!-- 3號格：指定為項鍊 -->
-            <div class="grid-item" data-type="necklace" onclick="toggleTooltip(this)">
-                <span class="slot-label">項鍊</span>
-                <img src="" class="equipped-img">
+            <!-- 精靈石 -->
+            <div class="enchant-row">
+                <span class="enchant-label">精靈石</span>
+                <select id="stoneSelect" onchange="applyEnchant('stone', this.value)"></select>
+                <div class="scroll-card" id="stoneDetail"></div>
             </div>
 
-            <!-- 其他格子以此類推，這裡先跑迴圈生成剩下的 -->
-            <script>
-                for (let i = 3; i <= 18; i++) {
-                    const isEmpty = i === 7 ? 'empty' : '';
-                    document.write(`
-                        <div class="grid-item ${isEmpty}" data-type="other" onclick="toggleTooltip(this)">
-                            <span class="slot-label">Slot ${i}</span>
-                            <img src="" class="equipped-img">
-                        </div>
-                    `);
-                }
-            </script>
         </div>
+    </div>
 
-        <!-- 懸浮選單 -->
-        <div id="itemTooltip" class="equipment-tooltip">
-            <!-- 內容會由 JS 動態生成 -->
-        </div>
-    </main>
+    <div id="itemTooltip"></div>
+</main>
 
-    <script>
-        // 裝備資料庫：你之後可以在這裡增加各部位的圖片網址
-        const itemDatabase = {
-            earring: [
-                "accessory/earring/聖所的耳環.png", 
-                "accessory/earring/太陽的悲願.png"
-            ],
-            necklace: [
-                "accessory/necklace/璀璨的貓咪項鍊.png",
-                ""
-            ],
-            other: [
-                "https://via.placeholder.com/60/444444?text=?"
-            ]
-        };
+<script>
+    const enchantDb = {
+        "隱藏的":   { type: "top",   slots: ["earring","necklace"], stats: { speed: 1 } },
+        "被遺忘的": { type: "top",   slots: ["head"],               stats: { speed: 2, crit: 3, bal: 4 } },
+        "鬥魂":     { type: "end",   slots: ["head"],               stats: { crit: 8 } },
+        "暴擊+2":   { type: "stone", slots: ["earring","necklace"], stats: { crit: 2 } },
+        "平衡+2":   { type: "stone", slots: ["earring","necklace"], stats: { bal: 2 } }
+    };
 
-        let currentActiveSlot = null;
+    const itemDb = {
+        earring:  [
+            { name: "聖所的耳環", img: "accessory/earring/聖所的耳環.png" },
+            { name: "太陽的悲願", img: "accessory/earring/太陽的悲願.png" }
+        ],
+        head:     [{ name: "埃柳頭盔",       img: "gear/head/埃柳頭盔.png" }],
+        necklace: [{ name: "璀璨的貓咪項鍊", img: "accessory/necklace/璀璨的貓咪項鍊.png" }]
+    };
 
-        function toggleTooltip(element) {
-            const tooltip = document.getElementById('itemTooltip');
-            
-            // 如果點擊的是同一個格子且選單已開啟，則關閉
-            if (currentActiveSlot === element && tooltip.style.display === 'grid') {
-                closeTooltip();
-                return;
-            }
+    let equippedState = {};
+    Object.keys(itemDb).forEach(key => {
+        equippedState[key] = { name: "", top: null, end: null, stone: null };
+    });
 
-            // 移除舊的發亮效果
-            if (currentActiveSlot) currentActiveSlot.classList.remove('active-slot');
-            
-            currentActiveSlot = element;
-            element.classList.add('active-slot');
+    let currentType = "";
+    let currentSlotEl = null;
 
-            const type = element.getAttribute('data-type');
-            renderOptions(type);
-
-            // 定位：將 Tooltip 放到格子的右邊
-            const rect = element.getBoundingClientRect();
-            const mainRect = document.getElementById('mainArea').getBoundingClientRect();
-            
-            tooltip.style.left = (rect.right - mainRect.left + 15) + 'px';
-            tooltip.style.top = (rect.top - mainRect.top) + 'px';
-            tooltip.style.display = 'grid';
+    function toggleTooltip(el) {
+        const tooltip = document.getElementById('itemTooltip');
+        if (currentSlotEl === el && tooltip.style.display === 'flex') {
+            closeTooltip(); return;
         }
+        if (currentSlotEl) currentSlotEl.classList.remove('active-slot');
+        currentSlotEl = el;
+        currentType = el.dataset.type;
+        el.classList.add('active-slot');
 
-        function renderOptions(type) {
-            const tooltip = document.getElementById('itemTooltip');
-            const items = itemDatabase[type] || itemDatabase['other'];
-            
-            tooltip.innerHTML = items.map(src => `
-                <img src="${src}" class="tooltip-option" onclick="selectItem('${src}')">
-            `).join('');
-        }
+        const items = itemDb[currentType] || [];
+        tooltip.innerHTML = items.map((item, i) =>
+            `<img src="${item.img}" class="tooltip-option" title="${item.name}" onclick="selectItem(${i})">`
+        ).join('');
 
-        function selectItem(src) {
-            if (currentActiveSlot) {
-                const imgTag = currentActiveSlot.querySelector('.equipped-img');
-                imgTag.src = src;
-                imgTag.style.display = 'block';
-                closeTooltip();
-            }
-        }
+        const rect = el.getBoundingClientRect();
+        tooltip.style.left = (rect.right + 10) + 'px';
+        tooltip.style.top  = rect.top + 'px';
+        tooltip.style.display = 'flex';
+    }
 
-        function closeTooltip() {
-            const tooltip = document.getElementById('itemTooltip');
-            tooltip.style.display = 'none';
-            if (currentActiveSlot) currentActiveSlot.classList.remove('active-slot');
-            currentActiveSlot = null;
-        }
+    function closeTooltip() {
+        document.getElementById('itemTooltip').style.display = 'none';
+        if (currentSlotEl) currentSlotEl.classList.remove('active-slot');
+    }
 
-        // 點擊空白處關閉
-        document.addEventListener('click', function(e) {
-            if (!e.target.closest('.grid-item') && !e.target.closest('.equipment-tooltip')) {
-                closeTooltip();
-            }
+    function selectItem(idx) {
+        const item = itemDb[currentType][idx];
+        equippedState[currentType].name = item.name;
+        const imgEl = currentSlotEl.querySelector('img');
+        imgEl.src = item.img;
+        imgEl.style.display = 'block';
+        showDetail(item.name);
+        document.getElementById('itemTooltip').style.display = 'none';
+    }
+
+    function showDetail(name) {
+        const panel = document.getElementById('detailPanel');
+        panel.style.display = 'flex';
+        document.getElementById('detailName').innerText = name;
+
+        ['top','end','stone'].forEach(t => {
+            const select = document.getElementById(`${t}Select`);
+            const available = Object.keys(enchantDb).filter(key => {
+                const e = enchantDb[key];
+                return e.type === t && (e.slots.includes(currentType) || e.slots.includes('all'));
+            });
+            select.innerHTML = `<option value="">（無）</option>` +
+                available.map(key => `<option value="${key}">${key}</option>`).join('');
+            select.value = equippedState[currentType][t] || '';
+            renderScrollCard(t, select.value);
         });
-    </script>
+    }
+
+    function applyEnchant(type, scrollName) {
+        equippedState[currentType][type] = scrollName;
+        renderScrollCard(type, scrollName);
+        calculateTotal();
+    }
+
+    function renderScrollCard(type, name) {
+        const card = document.getElementById(`${type}Detail`);
+        if (!name) {
+            card.innerHTML = '';
+            card.classList.remove('has-content');
+            return;
+        }
+        const data   = enchantDb[name].stats;
+        const labels = { atk: '攻擊力', speed: '攻擊速度', crit: '暴擊率', bal: '平衡' };
+        card.innerHTML = `<ul class="attr-list">
+                ${Object.keys(data).filter(k => data[k] > 0)
+                    .map(k => `<li>${labels[k]} +${data[k]}</li>`).join('')}
+            </ul>`;
+        card.classList.add('has-content');
+    }
+
+    function calculateTotal() {
+        let total = { atk: 0, speed: 0, crit: 0, bal: 0 };
+        Object.values(equippedState).forEach(item => {
+            ['top','end','stone'].forEach(t => {
+                const name = item[t];
+                if (name && enchantDb[name]) {
+                    const s = enchantDb[name].stats;
+                    Object.keys(total).forEach(k => total[k] += s[k] || 0);
+                }
+            });
+        });
+        document.getElementById('total-atk').innerText   = total.atk;
+        document.getElementById('total-speed').innerText = total.speed;
+        document.getElementById('total-crit').innerText  = total.crit;
+        document.getElementById('total-bal').innerText   = total.bal;
+    }
+
+    document.addEventListener('click', e => {
+        if (!e.target.closest('.grid-item') && !e.target.closest('#itemTooltip')) {
+            closeTooltip();
+        }
+    });
+</script>
 </body>
 </html>
