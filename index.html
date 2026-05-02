@@ -83,6 +83,8 @@
             padding: 20px;
             display: none;          /* 未選裝備時隱藏 */
             flex-direction: column;
+            gap: 8px;
+            height: calc(100vh - 60px);  /* 60px 是你的 padding，可以調 */
         }
 
         .detail-panel h2 {
@@ -114,6 +116,18 @@
             background: rgba(255,255,255,0.03);
             border: 1px solid #2a2a2a;
             border-radius: 10px;
+        }
+        
+        /* 精靈石獨立在外，固定高度不參與均分 */
+        .stone-row {
+            flex: none;
+            height: 140px;   /* 固定高度，自己調 */
+        }
+
+        /* 精靈石的 scroll-card 固定小高度 */
+        .stone-row .scroll-card {
+            flex: none;
+            height: 50px;   /* 一行的高度，自己調 */
         }
 
         .enchant-label {
@@ -153,6 +167,11 @@
             transition: opacity 0.1s;
         }
         .scroll-card.has-content { opacity: 1; }
+
+        .base-row .scroll-card {
+            flex: 1;
+            opacity: 1;  /* 永遠顯示，不需要 has-content 控制 */
+        }
 
         .scroll-title {
             color: #ffc107;
@@ -223,7 +242,14 @@
     <div id="detailPanel" class="detail-panel">
         <h2 id="detailName">裝備名稱</h2>
 
+        <!-- 字首 字尾 在 enchant-sections 裡面均分 -->
         <div class="enchant-sections">
+
+            <!-- 裝備本身 -->
+            <div class="enchant-row base-row">
+                <span class="enchant-label">裝備本身</span>
+                <div class="scroll-card has-content" id="baseStatCard"></div>
+            </div>
 
             <!-- 字首 -->
             <div class="enchant-row">
@@ -238,16 +264,17 @@
                 <select id="endSelect" onchange="applyEnchant('end', this.value)"></select>
                 <div class="scroll-card" id="endDetail"></div>
             </div>
-
-            <!-- 精靈石 -->
-            <div class="enchant-row">
-                <span class="enchant-label">精靈石</span>
-                <select id="stoneSelect" onchange="applyEnchant('stone', this.value)"></select>
-                <div class="scroll-card" id="stoneDetail"></div>
-            </div>
-
         </div>
+
+        <!-- 精靈石 -->
+        <div class="enchant-row stone-row">
+            <span class="enchant-label">精靈石</span>
+            <select id="stoneSelect" onchange="applyEnchant('stone', this.value)"></select>
+            <div class="scroll-card" id="stoneDetail"></div>
+        </div>
+
     </div>
+    
 
     <div id="itemTooltip"></div>
 </main>
@@ -263,8 +290,8 @@
 
     const itemDb = {
         earring:  [
-            { name: "聖所的耳環", img: "accessory/earring/聖所的耳環.png" },
-            { name: "太陽的悲願", img: "accessory/earring/太陽的悲願.png" }
+            { name: "聖所的耳環", img: "accessory/earring/聖所的耳環.png", stats: { crit: 5, bal: 3 } },
+            { name: "太陽的悲願", img: "accessory/earring/太陽的悲願.png", stats: { speed: 2 } }
         ],
         head:     [{ name: "埃柳頭盔",       img: "gear/head/埃柳頭盔.png" }],
         necklace: [{ name: "璀璨的貓咪項鍊", img: "accessory/necklace/璀璨的貓咪項鍊.png" }]
@@ -312,6 +339,7 @@
         imgEl.style.display = 'block';
         showDetail(item.name);
         document.getElementById('itemTooltip').style.display = 'none';
+        calculateTotal();
     }
 
     function showDetail(name) {
@@ -330,6 +358,18 @@
             select.value = equippedState[currentType][t] || '';
             renderScrollCard(t, select.value);
         });
+
+        // 新增：渲染道具本身屬性
+        const item = itemDb[currentType].find(i => i.name === name);
+        const card = document.getElementById('baseStatCard');
+        const labels = { atk: '攻擊力', speed: '攻擊速度', crit: '暴擊率', bal: '平衡' };
+        if (item.stats) {
+            card.innerHTML = `<ul class="attr-list">
+                ${Object.keys(item.stats).map(k => `<li>${labels[k]} +${item.stats[k]}</li>`).join('')}
+            </ul>`;
+        } else {
+            card.innerHTML = '';
+        }
     }
 
     function applyEnchant(type, scrollName) {
@@ -356,7 +396,19 @@
 
     function calculateTotal() {
         let total = { atk: 0, speed: 0, crit: 0, bal: 0 };
-        Object.values(equippedState).forEach(item => {
+    
+        Object.keys(equippedState).forEach(slot => {
+            const item = equippedState[slot];
+        
+            // 道具本身基礎屬性
+            if (item.name) {
+                const baseItem = itemDb[slot]?.find(i => i.name === item.name);
+                if (baseItem?.stats) {
+                    Object.keys(total).forEach(k => total[k] += baseItem.stats[k] || 0);
+                }
+            }
+
+            // 附魔
             ['top','end','stone'].forEach(t => {
                 const name = item[t];
                 if (name && enchantDb[name]) {
@@ -365,17 +417,12 @@
                 }
             });
         });
+
         document.getElementById('total-atk').innerText   = total.atk;
         document.getElementById('total-speed').innerText = total.speed;
         document.getElementById('total-crit').innerText  = total.crit;
         document.getElementById('total-bal').innerText   = total.bal;
     }
-
-    document.addEventListener('click', e => {
-        if (!e.target.closest('.grid-item') && !e.target.closest('#itemTooltip')) {
-            closeTooltip();
-        }
-    });
 </script>
 </body>
 </html>
