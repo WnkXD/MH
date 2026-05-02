@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>專業裝備模擬器</title>
+    <title>裝備模擬器</title>
     <style>
         body {
             margin: 0;
@@ -111,6 +111,7 @@
             border-color: #ffc107 !important;
             box-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
         }
+        
     </style>
 </head>
 <body>
@@ -124,8 +125,8 @@
     <main class="main-content" id="mainArea">
         <div class="grid-container" id="gridContainer">
             <!-- 1號格：指定為頭部 -->
-            <div class="grid-item" data-type="head" onclick="toggleTooltip(this)">
-                <span class="slot-label">HEAD</span>
+            <div class="grid-item" data-type="earring" onclick="toggleTooltip(this)">
+                <span class="slot-label">耳環</span>
                 <img src="" class="equipped-img">
             </div>
 
@@ -158,9 +159,9 @@
     <script>
         // 裝備資料庫：你之後可以在這裡增加各部位的圖片網址
         const itemDatabase = {
-            head: [
-                "https://via.placeholder.com/60/FFD700?text=H1", 
-                "https://via.placeholder.com/60/DAA520?text=H2"
+            earring: [
+                "accessory/earring/聖所的耳環.png", 
+                "accessory/earring/太陽的悲願.png"
             ],
             hand: [
                 "https://via.placeholder.com/60/C0C0C0?text=S1",
