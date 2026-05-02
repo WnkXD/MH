@@ -136,6 +136,12 @@
                 <img src="" class="equipped-img">
             </div>
 
+            <!-- 3號格：指定為項鍊 -->
+            <div class="grid-item" data-type="necklace" onclick="toggleTooltip(this)">
+                <span class="slot-label">項鍊</span>
+                <img src="" class="equipped-img">
+            </div>
+
             <!-- 其他格子以此類推，這裡先跑迴圈生成剩下的 -->
             <script>
                 for (let i = 3; i <= 18; i++) {
@@ -163,9 +169,9 @@
                 "accessory/earring/聖所的耳環.png", 
                 "accessory/earring/太陽的悲願.png"
             ],
-            hand: [
-                "https://via.placeholder.com/60/C0C0C0?text=S1",
-                "https://via.placeholder.com/60/808080?text=S2"
+            necklace: [
+                "accessory/necklace/璀璨的貓咪項鍊.png",
+                ""
             ],
             other: [
                 "https://via.placeholder.com/60/444444?text=?"
