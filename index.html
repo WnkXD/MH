@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>逆轉魔卡組隊模擬器</title>
+    <script defer src="https://cdn.vercel-insights.com/v1/script.js"></script>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --accent-color: #ffcc00;
+            --neon-gold: rgba(255, 204, 0, 0.4);
+            --grid-border: #444;
+            --rarity-gold: #ffcc00;
+            --rarity-purple: #a335ee;
+            --rarity-blue: #0070dd;
+            --rarity-white: #ffffff;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: white;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: auto;
+        }
+        /*文字上色*/
+        h {
+            color: #2dc53a;
+            font-weight: bold;
+            display: inline; /* 確保它不會換行 */
+        }
+
+        .sidebar {
+            width: 160px;
+            background-color: #111;
+            padding: 20px;
+            border-right: 1px solid var(--grid-border);
+            flex-shrink: 0;
+            overflow-y: auto;
+        }
+        .filter-title { color: var(--accent-color); font-size: 15px; margin: 20px 0 10px 0; border-bottom: 1px solid #333; }
+        .filter-item { margin: 10px 0; cursor: pointer; display: flex; align-items: center; font-size: 13px; }
+        .filter-item input { margin-right: 8px; width: 16px; height: 16px; cursor: pointer; }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            background: #1a1a1a;
+        }
+
+        .tooltip-desc img, .info-card img {
+            display: inline;
+            vertical-align: middle;
+            height: 1.2em;
+        }
+
+        .center-core {
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-start;
+            align-items: flex-start;
+            gap: 50px;
+            margin-top: 20px;
+            padding-left: 50px;
+        }
+
+        .analysis-panel {
+            width: 280px;
+            background: rgba(20, 20, 20, 0.6);
+            padding: 18px;
+            border-radius: 10px;
+            border: 1px solid #2a2a2a;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
+        }
+        .stat-row { display: flex; align-items: center; margin-bottom: 10px; font-size: 12px; }
+        .stat-label { width: 75px; flex-shrink: 0; color: #999; }
+        .stat-bar-bg {
+            flex: 1; background: #080808; height: 8px; border-radius: 4px;
+            overflow: hidden; margin: 0 10px; border: 1px solid #222;
+        }
+        .stat-bar-fill {
+            background: linear-gradient(90deg, #b38f00 0%, var(--accent-color) 50%, #b38f00 100%);
+            background-size: 200% 100%;
+            height: 100%; width: 0%; transition: width 0.4s ease-out;
+            animation: barShine 2s infinite linear;
+        }
+        @keyframes barShine { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
+        .stat-count { width: 25px; text-align: right; font-weight: bold; color: var(--accent-color); text-shadow: 0 0 5px var(--neon-gold); }
+
+        .team-container { display: flex; flex-direction: column; align-items: flex-start; gap: 15px; }
+
+        .slot {
+            width: 70px; height: 70px;
+            border: 2px solid var(--grid-border);
+            border-radius: 8px;
+            cursor: pointer;
+            position: relative;
+            perspective: 600px;
+            transition: border-color 0.15s;
+        }
+        .slot:hover { border-color: #888; }
+
+        .slot-inner {
+            width: 100%; height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 6px;
+        }
+        .slot.is-evo .slot-inner { transform: rotateY(180deg); }
+
+        .slot-face {
+            position: absolute;
+            width: 100%; height: 100%;
+            backface-visibility: hidden;
+            border-radius: 6px;
+            background-size: cover;
+            background-position: center;
+            background-color: var(--card-bg);
+        }
+        .slot-back { transform: rotateY(180deg); }
+
+        .evo-tag {
+            display: none;
+            position: absolute;
+            top: -8px; right: -8px;
+            background: #c81414;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 2px 5px;
+            border-radius: 4px;
+            z-index: 10;
+            pointer-events: none;
+            box-shadow: 0 0 6px rgba(204, 68, 255, 0.7);
+        }
+
+        .leader-slot {
+            width: 80px; height: 80px;
+            border-width: 3px;
+            position: relative;
+        }
+        .leader-slot::after {
+            content: "隊長";
+            position: absolute;
+            right: -70px; top: 20px;
+            color: var(--accent-color);
+            font-weight: bold;
+            font-size: 25px;
+            pointer-events: none;
+        }
+
+        .member-grid { display: grid; grid-template-columns: repeat(4, 70px); gap: 10px; }
+
+        .info-panel {
+            min-width: 0;
+            flex: 1;
+            max-width: 930px;
+            background: #2a2a2a;
+            padding: 25px;
+            border-left: 1px solid #222;
+            flex-shrink: 0;
+            overflow-y: auto;
+        }
+        #teamInfoList { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+        .info-card {
+            background: rgba(40,40,40,0.3); padding: 12px; border-radius: 8px;
+            box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.3);
+        }
+        .info-hero-img { width: 60px; height: 60px; border-radius: 30px; background-size: cover; background-position: center; margin-bottom: 8px; background-color: #222; }
+
+        .hero-picker {
+            background: #080808; padding: 15px; border-top: 1px solid var(--grid-border);
+            height: 300px; overflow-y: auto;
+            position: relative;
+        }
+        .hero-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(65px, 1fr)); gap: 12px; }
+        .hero-item {
+            width: 60px; height: 60px; background: #222; border-radius: 8px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            font-size: 11px; border: 2px solid #444; background-size: cover; background-position: center;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .hero-item:not(.disabled):hover {
+            transform: scale(1.1) translateY(-5px);
+            z-index: 10;
+            box-shadow: 0 5px 15px rgba(255,204,0,0.3);
+        }
+        .hero-item.disabled { opacity: 0.2; filter: grayscale(1); cursor: default; }
+
+        .need-evo-hint {
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 100%;
+            background: rgba(200, 20, 20, 0.9);
+            color: white;
+            font-size: 12px;
+            text-align: center;
+            padding: 2px 0;
+            pointer-events: none;
+            border-radius: 0 0 6px 6px;
+            font-weight: bold;
+        }
+
+        /* ══ 懸停預覽框 ══ */
+        #heroTooltip {
+            position: fixed;
+            z-index: 9999;
+            width: 260px;
+            background: #1c1c1c;
+            border-radius: 10px;
+            padding: 14px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.7);
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(6px);
+            transition: opacity 0.15s ease, transform 0.15s ease;
+        }
+        #heroTooltip.visible { opacity: 1; transform: translateY(0); }
+        .tooltip-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .tooltip-img {
+            width: 48px; height: 48px; border-radius: 24px;
+            background-size: cover; background-position: center;
+            background-color: #333; flex-shrink: 0;
+        }
+        .tooltip-name { font-size: 15px; font-weight: bold; color: var(--accent-color); }
+        .tooltip-mode { font-size: 13px; color: #aaa; margin-top: 2px; }
+        .tooltip-divider { border: none; border-top: 1px solid #333; margin: 8px 0; }
+        .tooltip-section { margin-bottom: 8px; }
+        .tooltip-section-title {
+            font-size: 11px; font-weight: bold; padding: 2px 6px;
+            border-radius: 3px; display: inline-block; margin-bottom: 4px;
+        }
+        .tooltip-section-title.base { background: #333; color: #ccc; }
+        .tooltip-section-title.evo  { background: #c81414; color: #ffffff; }
+        .tooltip-desc { font-size: 13px; color: #e6e4e4; line-height: 1.6; }
+
+        /* ══ 儲存/載入 Modal ══ */
+        #saveModal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        }
+        #saveModal.open { display: flex; }
+        .modal-box {
+            background: #1e1e1e;
+            border: 1px solid #444;
+            border-radius: 12px;
+            padding: 24px;
+            width: 360px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal-title {
+            color: var(--accent-color);
+            font-size: 16px;
+            font-weight: bold;
+            margin: 0 0 16px 0;
+            border-bottom: 1px solid #333;
+            padding-bottom: 8px;
+        }
+        .modal-input-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        .modal-input-row input {
+            flex: 1;
+            background: #111;
+            border: 1px solid #444;
+            border-radius: 6px;
+            color: white;
+            padding: 6px 10px;
+            font-size: 13px;
+            font-family: inherit;
+        }
+        .modal-input-row input:focus { outline: none; border-color: var(--accent-color); }
+
+        /* 通用按鈕樣式 */
+        .btn {
+            padding: 6px 14px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+            font-family: inherit;
+            font-weight: bold;
+            transition: opacity 0.15s;
+        }
+        .btn:hover { opacity: 0.85; }
+        .btn-gold   { background: var(--accent-color); color: #111; }
+        .btn-red    { background: #c81414; color: white; }
+        .btn-gray   { background: #333; color: #ccc; }
+
+        .save-slot-list { display: flex; flex-direction: column; gap: 8px; }
+        .save-slot-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #111;
+            border-radius: 8px;
+            padding: 8px 10px;
+            border: 1px solid #333;
+        }
+        .save-slot-name { flex: 1; font-size: 13px; color: #ddd; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .save-slot-time { font-size: 11px; color: #666; flex-shrink: 0; }
+
+        /* 工具列按鈕群 */
+        .toolbar {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 4px;
+        }
+
+        /* toast 提示 */
+        #toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: #333;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            opacity: 0;
+            transition: opacity 0.2s, transform 0.2s;
+            pointer-events: none;
+            z-index: 20000;
+        }
+        #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        .rarity-gold   { border-color: var(--rarity-gold)   !important; }
+        .rarity-purple { border-color: var(--rarity-purple) !important; }
+        .rarity-blue   { border-color: var(--rarity-blue)   !important; }
+        .rarity-white  { border-color: var(--rarity-white)  !important; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <h3 class="filter-title" style="margin-top:0">功能控制</h3>
+    <div style="display:flex; gap:5px; margin-bottom:15px;">
+        <button onclick="toggleAllFilters(true)"  style="flex:1; cursor:pointer;">全選</button>
+        <button onclick="toggleAllFilters(false)" style="flex:1; cursor:pointer;">取消</button>
+    </div>
+
+    <h3 class="filter-title">傷害輸出</h3>
+    <div class="filter-item"><input type="checkbox" class="type-filter" value="star"      checked onchange="renderHeroes()"> 勝利之星</div>
+    <div class="filter-item"><input type="checkbox" class="type-filter" value="cursedmg"  checked onchange="renderHeroes()"> 咒印傷害</div>
+    <div class="filter-item"><input type="checkbox" class="type-filter" value="magic"     checked onchange="renderHeroes()"> 魔法傷害</div>
+    <div class="filter-item"><input type="checkbox" class="type-filter" value="lifesteal" checked onchange="renderHeroes()"> 吸血傷害</div>
+    <div class="filter-item"><input type="checkbox" class="type-filter" value="pointdmg"  checked onchange="renderHeroes()"> 牌型點數傷害</div>
+
+    <h3 class="filter-title">輔助技能</h3>
+    <div class="filter-item"><input type="checkbox" class="type-filter" value="magicbuff" checked onchange="renderHeroes()"> 法傷增幅</div>
+    <div class="filter-item"><input type="checkbox" class="type-filter" value="addcard"   checked onchange="renderHeroes()"> 增加換牌</div>
+    <div class="filter-item"><input type="checkbox" class="type-filter" value="addpower"  checked onchange="renderHeroes()"> 增加祕法能量</div>
+    <div class="filter-item"><input type="checkbox" class="type-filter" value="point"     checked onchange="renderHeroes()"> 增加牌型點數</div>
+    <div class="filter-item"><input type="checkbox" class="type-filter" value="heal"      checked onchange="renderHeroes()"> 恢復生命</div>
+    <div class="filter-item"><input type="checkbox" class="type-filter" value="cardsteal" checked onchange="renderHeroes()"> 偷取換牌</div>
+    <div class="filter-item"><input type="checkbox" class="type-filter" value="copyskill" checked onchange="renderHeroes()"> 複製技能</div>
+    <div class="filter-item"><input type="checkbox" class="type-filter" value="guard"     checked onchange="renderHeroes()"> 光之守護</div>
+
+    <h3 class="filter-title">狀態異常</h3>
+    <div class="filter-item"><input type="checkbox" class="type-filter" value="blind"     checked onchange="renderHeroes()"> 手牌盲目</div>
+    <div class="filter-item"><input type="checkbox" class="type-filter" value="cover"     checked onchange="renderHeroes()"> 遮蓋撲克牌</div>
+    <div class="filter-item"><input type="checkbox" class="type-filter" value="curse"     checked onchange="renderHeroes()"> 詛咒</div>
+    <div class="filter-item"><input type="checkbox" class="type-filter" value="charm"     checked onchange="renderHeroes()"> 魅惑</div>
+    <div class="filter-item"><input type="checkbox" class="type-filter" value="weapondmg" checked onchange="renderHeroes()"> 武器傷害</div>
+    <div class="filter-item"><input type="checkbox" class="type-filter" value="delpower"  checked onchange="renderHeroes()"> 降低祕法能量</div>
+    <div class="filter-item"><input type="checkbox" class="type-filter" value="blockcard" checked onchange="renderHeroes()"> 封鎖英雄</div>
+</div>
+
+<div style="flex:1; display:flex; flex-direction:column;">
+    <div class="main-content">
+        <h2 style="text-align:center; color:var(--accent-color); margin:0 0 10px 0;">左鍵鬪化　右鍵退隊</h2>
+
+        <!-- 工具列 -->
+        <div class="toolbar">
+            <button class="btn btn-gold"  onclick="openSaveModal()">💾 儲存 / 載入</button>
+            <button class="btn btn-red"   onclick="clearTeam()">✕ 清空隊伍</button>
+        </div>
+
+        <div class="center-core">
+            <div class="team-container">
+                <div class="slot leader-slot" id="slot-0">
+                    <div class="slot-inner">
+                        <div class="slot-face slot-front"></div>
+                        <div class="slot-face slot-back"></div>
+                    </div>
+                    <div class="evo-tag">鬪化</div>
+                </div>
+                <div class="member-grid" id="memberGrid"></div>
+            </div>
+
+            <div class="analysis-panel">
+                <h4 style="margin:0 0 15px 0; color:var(--accent-color); border-bottom:1px solid #444; padding-bottom:5px;">隊伍戰術分析</h4>
+                <div id="statPanel"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="hero-picker">
+        <div class="hero-list" id="heroList"></div>
+    </div>
+</div>
+
+<div class="info-panel">
+    <div id="teamInfoList">
+        <div style="text-align:center; color:#444; margin-top:30px;">尚未選擇英雄</div>
+    </div>
+</div>
+
+<!-- 懸停預覽框 -->
+<div id="heroTooltip">
+    <div class="tooltip-header">
+        <div class="tooltip-img" id="ttImg"></div>
+        <div>
+            <div class="tooltip-name" id="ttName"></div>
+            <div class="tooltip-mode" id="ttRarity"></div>
+        </div>
+    </div>
+    <hr class="tooltip-divider">
+    <div id="ttBody"></div>
+</div>
+
+<!-- 儲存/載入 Modal -->
+<div id="saveModal">
+    <div class="modal-box">
+        <div class="modal-title">💾 儲存 / 載入隊伍</div>
+
+        <!-- 儲存區 -->
+        <div style="font-size:12px; color:#999; margin-bottom:6px;">輸入名稱後儲存目前隊伍：</div>
+        <div class="modal-input-row">
+            <input type="text" id="saveNameInput" placeholder="隊伍名稱（例如：詛咒速攻）" maxlength="20">
+            <button class="btn btn-gold" onclick="saveCurrentTeam()">儲存</button>
+        </div>
+
+        <!-- 已存清單 -->
+        <div style="font-size:12px; color:#999; margin-bottom:8px;">已儲存的隊伍：</div>
+        <div class="save-slot-list" id="saveSlotList"></div>
+
+        <div style="margin-top:16px; text-align:right;">
+            <button class="btn btn-gray" onclick="closeSaveModal()">關閉</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+    const STORAGE_KEY = 'team_saves_v1';
+
+    const typeNames = {
+        star:"勝利之星", cursedmg:"咒印傷害", magic:"法傷", lifesteal:"吸血", pointdmg:"點數傷害",
+        addpower:"增加能量", point:"增加點數", magicbuff:"法傷增幅",
+        heal:"恢復生命", addcard:"換牌", copyskill:"複製技能", guard:"光之守護",
+        curse:"詛咒",
+        weapondmg:"武器傷害", delpower:"降低祕法", cardsteal:"偷取換牌",
+        cover:"狀態異常", blind:"狀態異常", charm:"狀態異常", blockcard:"狀態異常",
+        abnormal:"狀態異常"
+    };
+
+    const mergeType = {
+        cover: "abnormal", blind: "abnormal",
+        charm: "abnormal", blockcard: "abnormal"
+    };
+
+    const rarityLabel = {
+        gold:   { label:"傳說", color:"var(--rarity-gold)" },
+        purple: { label:"史詩", color:"var(--rarity-purple)" },
+        blue:   { label:"稀有", color:"var(--rarity-blue)" },
+        white:  { label:"普通", color:"var(--rarity-white)" },
+    };
+
+    const heroes = [
+        { id:1, name:"布倫希爾德", img:"heroes/gold/布倫希爾德.png", rarity:"gold", canEvo:false,
+          base:{ type:["star","weapondmg"], desc:"依據 勝利之星 x <h>1700</h> 提升ATK<br>依 ATK 再給予 魔法傷害<br>被攻擊的英雄，每回合給予破損效果" } },
+        { id:2, name:"凱伊", img:"heroes/gold/凱伊.png", rarity:"gold", canEvo:false,
+          base:{ type:["star","weapondmg"], desc:"ATK 提升 <h>1</h> +(勝利之星 x <h>0.7</h> 倍)<br>被攻擊的英雄，受到重擊效果" } },
+        { id:3, name:"伊瑟", img:"heroes/gold/伊瑟.png", rarity:"gold", canEvo:true,
+          base:{ type:["addcard","magicbuff"], desc:"我方三個陣地 魔法傷害增強 <h>1.8</h> 倍<br>增加 <h>3</h> 張 換牌" },
+          evo: { type:["magicbuff","addcard"], desc:"我方一個陣地 魔法傷害增強 <h>3.2</h> 倍，持續兩回合<br>增加 <h>4</h> 張 換牌"} },
+        { id:4, name:"赫拉薇絲", img:"heroes/gold/赫拉薇絲.png", rarity:"gold", canEvo:false,
+          base:{ type:["charm","lifesteal","magic"], 
+            desc:"敵方ATK最高的 <h>2</h> 位英雄進入魅惑狀態<br>\
+                單回合：<br>封鎖 換牌 <h>2</h> 回合，給予 <h>8000</h> 魔法傷害<br>\
+                雙回合：<br>封鎖祕法 <h>2</h> 回合，依回合數 x <h>1800</h> 吸取傷害" } },
+        { id:5, name:"邱比特", img:"heroes/gold/邱比特.png", rarity:"gold", canEvo:false,
+          base:{ type:["addcard","cover","blind","delpower","star"],
+            desc:"光環效果 我方手牌ATK提升 <h>1.2</h> 倍\
+                <br>單回合：<br>遮蓋 <h>10</h> 張撲克牌，依勝利之星 x <h>1</h> 張增加 換牌\
+                <br>雙回合：<br>下回合 <h>5</h> 張手牌盲目，依勝利之星 x <h>10</h> 降低祕法能量" } },
+        { id:6, name:"闇影喵師", img:"heroes/purple/闇影喵師.png", rarity:"purple", canEvo:true,
+          base:{ type:["curse","heal"], desc:"敵方手牌陷入 <h>10</h> 個 詛咒<br>每回合恢復 <h>4000</h> HP，持續3回合" },
+          evo: { type:["curse","cursedmg","lifesteal","pointdmg"],
+          desc:"給予敵方手牌詛咒 x <h>1800</h> 的咒印傷害<br>依牌型點數 x <h>100</h> 吸取傷害<br>被攻擊的英雄，每回合手牌陷入 <h>3</h> 個 詛咒" } },
+        { id:7, name:"烏爾德", img:"heroes/gold/烏爾德.png", rarity:"gold", canEvo:false,
+          base:{ type:["point","magic","addcard","pointdmg"],
+          desc:"依牌型點數 x <h>500</h> 給予 魔法傷害<br>我方三個陣地點數增加 <h>200</h> 點，<br>持續兩回合<br>增加 <h>10</h> 張 換牌" } },
+        { id:8, name:"驅魔師", img:"heroes/blue/驅魔師.png", rarity:"blue", canEvo:true,
+          base:{ type:["addcard","magic"], desc:"依敵方當前HP的 <h>23%</h> 給予 魔法傷害<br>增加 <h>2</h> 張 換牌" },
+          evo: { type:["star","magic","addcard"], desc:"依 勝利之星 x <h>1800</h> 給予 魔法傷害<br>增加 <h>3</h> 張 換牌" } },
+        { id:9, name:"神使", img:"heroes/white/神使.png", rarity:"white", canEvo:true,
+          base:{ type:["addcard"], desc:"增加 <h>6</h> 張 換牌" },
+          evo: { type:["cardsteal"], desc:"偷取敵方最多 <h>6</h> 張 換牌" } },
+        { id:10, name:"勾魂判官", img:"heroes/purple/勾魂判官.png", rarity:"purple", canEvo:true,
+          base:{ type:["magic","blockcard","pointdmg"], desc:"依牌型點數 x <h>180</h> 給予 魔法傷害<br>封鎖敵方ATK最低的英雄 <h>3</h> 回合" },
+          evo: { type:["star","magic","curse"], desc:"敵方手牌陷入 勝利之星 x <h>1</h> 個 詛咒<br>以隊伍總ATK的 <h>25%</h> 給予 魔法傷害" } },
+        { id:11, name:"梅林", img:"heroes/gold/梅林.png", rarity:"gold", canEvo:false,
+          base:{ type:["copyskill"], desc:"隨機複製我方上陣英雄技能" } },
+        { id:12, name:"關羽", img:"heroes/gold/關羽.png", rarity:"gold", canEvo:false,
+          base:{ type:["pointdmg","magic","lifesteal"],
+          desc:"依牌型點數 x <h>300</h> 提升 ATK<br>\
+                依牌型點數 x <h>300</h> 給予 魔法傷害<br>\
+                依牌型點數 x <h>300</h> 吸取傷害" } },
+        { id:13, name:"海姆達爾", img:"heroes/gold/海姆達爾.png", rarity:"gold", canEvo:false,
+          base:{ type:["point","guard"], desc:"光之守護 <h>3</h> 回合，免疫負面狀態<br>隨機兩個陣地牌型點數增加 <h>35</h> 點" } },
+        { id:14, name:"御魔劍士", img:"heroes/purple/御魔劍士.png", rarity:"purple", canEvo:true,
+          base:{ type:["pointdmg","magic"], desc:"依牌型點數 x <h>100</h> 提升 ATK<br>再給予 <h>6000</h> 魔法傷害" },
+          evo: { type:["pointdmg","magic","lifesteal"],
+          desc:"依牌型點數 x <h>100</h> 提升 ATK<br>\
+               依牌型點數 x <h>100</h> 給予 魔法傷害<br>\
+               依牌型點數 x <h>100</h> 吸取傷害" } },
+        
+    ];
+
+    let selectedTeam = Array(13).fill(null);
+
+    /* ══ Toast ══ */
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2000);
+    }
+
+    /* ══ 清空隊伍 ══ */
+    function clearTeam() {
+        if (!selectedTeam.some(Boolean)) return;
+        /*增加確認框*/
+        /*if (!confirm('確定要清空所有上陣英雄嗎？')) return;*/
+        selectedTeam = Array(13).fill(null);
+        updateUI();
+        showToast('隊伍已清空');
+    }
+
+    /* ══ Modal 開關 ══ */
+    function openSaveModal() {
+        renderSaveSlots();
+        document.getElementById('saveNameInput').value = '';
+        document.getElementById('saveModal').classList.add('open');
+    }
+    function closeSaveModal() {
+        document.getElementById('saveModal').classList.remove('open');
+    }
+    // 點背景關閉
+    document.getElementById('saveModal').addEventListener('click', e => {
+        if (e.target === document.getElementById('saveModal')) closeSaveModal();
+    });
+
+    /* ══ 取得/寫入 localStorage ══ */
+    function getSaves() {
+        try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+        catch { return []; }
+    }
+    function setSaves(arr) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+    }
+
+    /* ══ 儲存目前隊伍 ══ */
+    function saveCurrentTeam() {
+        const name = document.getElementById('saveNameInput').value.trim();
+        if (!name) { showToast('請輸入隊伍名稱'); return; }
+        if (!selectedTeam.some(Boolean)) { showToast('隊伍是空的，無法儲存'); return; }
+
+        // 只存 id 和 currentMode，不存整個 hero 物件（避免 localStorage 爆掉）
+        const snapshot = selectedTeam.map(h => h ? { id: h.id, mode: h.currentMode } : null);
+
+        const saves = getSaves();
+        // 同名覆蓋
+        const existing = saves.findIndex(s => s.name === name);
+        const entry = { name, snapshot, time: new Date().toLocaleString('zh-TW') };
+        if (existing >= 0) saves[existing] = entry;
+        else saves.unshift(entry);
+
+        // 最多存 10 組
+        if (saves.length > 10) saves.splice(10);
+
+        setSaves(saves);
+        renderSaveSlots();
+        showToast(`「${name}」已儲存`);
+    }
+
+    /* ══ 載入隊伍 ══ */
+    function loadTeam(snapshot) {
+        selectedTeam = snapshot.map(s => {
+            if (!s) return null;
+            const hero = heroes.find(h => h.id === s.id);
+            if (!hero) return null;
+            return { ...hero, currentMode: s.mode || 'base' };
+        });
+        updateUI();
+        closeSaveModal();
+        showToast('隊伍已載入');
+    }
+
+    /* ══ 刪除存檔 ══ */
+    function deleteSave(name) {
+        if (!confirm(`確定刪除「${name}」？`)) return;
+        const saves = getSaves().filter(s => s.name !== name);
+        setSaves(saves);
+        renderSaveSlots();
+        showToast(`「${name}」已刪除`);
+    }
+
+    /* ══ 渲染存檔清單 ══ */
+    function renderSaveSlots() {
+        const saves = getSaves();
+        const list = document.getElementById('saveSlotList');
+        if (!saves.length) {
+            list.innerHTML = '<div style="color:#555; font-size:12px; text-align:center; padding:12px 0;">尚無儲存的隊伍</div>';
+            return;
+        }
+        list.innerHTML = saves.map(s => `
+            <div class="save-slot-item">
+                <div class="save-slot-name">${s.name}</div>
+                <div class="save-slot-time">${s.time}</div>
+                <button class="btn btn-gold"  style="padding:4px 10px; font-size:12px;" onclick="loadTeam(${JSON.stringify(s.snapshot).replace(/"/g, '&quot;')})">載入</button>
+                <button class="btn btn-red"   style="padding:4px 8px;  font-size:12px;" onclick="deleteSave('${s.name.replace(/'/g, "\\'")}')">✕</button>
+            </div>`).join('');
+    }
+
+    /* ══ Tooltip ══ */
+    const tooltip = document.getElementById('heroTooltip');
+    let tooltipTimer = null;
+
+    function showTooltip(hero, mouseX, mouseY) {
+        document.getElementById('ttImg').style.backgroundImage = `url('${hero.img}')`;
+        document.getElementById('ttName').textContent = hero.name;
+        const r = rarityLabel[hero.rarity] || { label: hero.rarity, color: '#fff' };
+        document.getElementById('ttRarity').textContent = r.label;
+        document.getElementById('ttRarity').style.color = r.color;
+
+        let body = `<div class="tooltip-section">
+            <span class="tooltip-section-title base">基礎技能</span>
+            <div class="tooltip-desc">${formatDescription(hero.base.desc)}</div>
+        </div>`;
+        if (hero.canEvo && hero.evo && hero.evo.desc) {
+            body += `<div class="tooltip-section">
+                <span class="tooltip-section-title evo">鬪化技能</span>
+                <div class="tooltip-desc">${formatDescription(hero.evo.desc)}</div>
+            </div>`;
+        }
+        document.getElementById('ttBody').innerHTML = body;
+        positionTooltip(mouseX, mouseY);
+        tooltip.classList.add('visible');
+    }
+
+    function positionTooltip(mouseX, mouseY) {
+        const TW = 260 + 16;
+        const TH = tooltip.offsetHeight || 200;
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        let left = mouseX + 14;
+        let top  = mouseY - 10;
+        if (left + TW > vw) left = mouseX - TW + 2;
+        if (top + TH > vh)  top  = vh - TH - 10;
+        if (top < 8)        top  = 8;
+        tooltip.style.left = left + 'px';
+        tooltip.style.top  = top  + 'px';
+    }
+
+    function hideTooltip() { tooltip.classList.remove('visible'); }
+
+    /* ══ 初始化 slot ══ */
+    function initSlots() {
+        const memberGrid = document.getElementById('memberGrid');
+        memberGrid.innerHTML = "";
+        for (let i = 1; i <= 12; i++) {
+            const div = document.createElement('div');
+            div.className = 'slot';
+            div.id = `slot-${i}`;
+            div.innerHTML = `
+                <div class="slot-inner">
+                    <div class="slot-face slot-front"></div>
+                    <div class="slot-face slot-back"></div>
+                </div>
+                <div class="evo-tag">鬪化</div>`;
+            memberGrid.appendChild(div);
+        }
+        for (let i = 0; i <= 12; i++) {
+            const el = document.getElementById(`slot-${i}`);
+            el.addEventListener('click', () => handleSlotClick(i));
+            el.addEventListener('contextmenu', e => { e.preventDefault(); removeHero(i); });
+        }
+    }
+
+    function handleSlotClick(idx) {
+        const hero = selectedTeam[idx];
+        if (!hero) return;
+        if (hero.canEvo && hero.evo) {
+            hero.currentMode = (hero.currentMode === 'base') ? 'evo' : 'base';
+            updateUI();
+        }
+    }
+
+    function removeHero(idx) {
+        selectedTeam[idx] = null;
+        updateUI();
+    }
+
+    function formatDescription(desc) {
+        if (!desc) return "";
+        const imgConfig = {
+            "ATK":     "icons/sword.png",
+            "勝利之星": "icons/star.png",
+            "魔法傷害": "icons/magic.png",
+            "詛咒":     "icons/curse.png",
+            "換牌":     "icons/poker.png",
+            "吸取傷害": "icons/lifesteal.png",
+            "光環效果": "icons/halo.png",
+        };
+        let result = desc;
+        for (const [word, src] of Object.entries(imgConfig)) {
+            result = result.replace(new RegExp(word, 'g'),
+                `<img src="${src}" style="height:1.2em; vertical-align:-0.25em;" title="${word}">`);
+        }
+        return result;
+    }
+
+    /* ══ 英雄列表 ══ */
+    function renderHeroes() {
+        const list = document.getElementById('heroList');
+        const activeFilters = Array.from(document.querySelectorAll('.type-filter:checked')).map(cb => cb.value);
+
+        const filtered = heroes.filter(h => {
+            const allTypes = [...new Set([...h.base.type, ...(h.canEvo && h.evo ? h.evo.type : [])])];
+            return allTypes.some(t => activeFilters.includes(t));
+        });
+
+        list.innerHTML = filtered.map(hero => {
+            const isSelected = selectedTeam.some(s => s && s.id === hero.id);
+            const matchedActive = activeFilters.filter(f =>
+                hero.base.type.includes(f) || (hero.canEvo && hero.evo && hero.evo.type.includes(f))
+            );
+            const onlyInEvo = hero.canEvo && matchedActive.every(f => !hero.base.type.includes(f));
+            const evoHint = onlyInEvo ? `<div class="need-evo-hint">需鬪化</div>` : '';
+
+            return `
+                <div class="hero-item rarity-${hero.rarity} ${isSelected ? 'disabled' : ''}"
+                     style="background-image:url('${hero.img}')"
+                     data-hero-id="${hero.id}"
+                     onclick="${isSelected ? '' : `addHeroById(${hero.id})`}">
+                    ${hero.img ? '' : hero.name}
+                    ${evoHint}
+                </div>`;
+        }).join('');
+
+        list.onmouseover = null; list.onmousemove = null; list.onmouseout = null;
+
+        list.addEventListener('mouseover', e => {
+            const item = e.target.closest('.hero-item');
+            if (!item || item.classList.contains('disabled')) return;
+            const hero = heroes.find(h => h.id === +item.dataset.heroId);
+            if (!hero) return;
+            clearTimeout(tooltipTimer);
+            tooltipTimer = setTimeout(() => showTooltip(hero, e.clientX, e.clientY), 80);
+        });
+        list.addEventListener('mousemove', e => {
+            if (tooltip.classList.contains('visible')) positionTooltip(e.clientX, e.clientY);
+        });
+        list.addEventListener('mouseout', e => {
+            if (!e.target.closest('.hero-item')) return;
+            clearTimeout(tooltipTimer);
+            hideTooltip();
+        });
+    }
+
+    function addHeroById(id) {
+        const hero = heroes.find(h => h.id === id);
+        if (!hero) return;
+        if (selectedTeam.some(s => s && s.id === id)) { showToast('隊伍中已存在此英雄'); return; }
+        const idx = selectedTeam.findIndex(s => s === null);
+        if (idx !== -1) {
+            selectedTeam[idx] = { ...hero, currentMode: 'base' };
+            updateUI();
+        }
+    }
+
+    function toggleAllFilters(val) {
+        document.querySelectorAll('.type-filter').forEach(f => f.checked = val);
+        renderHeroes();
+    }
+
+    /* ══ 主 UI 更新 ══ */
+    function updateUI() {
+        for (let i = 0; i <= 12; i++) {
+            const hero  = selectedTeam[i];
+            const slot  = document.getElementById(`slot-${i}`);
+            const front = slot.querySelector('.slot-front');
+            const back  = slot.querySelector('.slot-back');
+            const tag   = slot.querySelector('.evo-tag');
+
+            slot.className = 'slot' + (i === 0 ? ' leader-slot' : '');
+
+            if (hero) {
+                slot.classList.add(`rarity-${hero.rarity}`);
+                front.style.backgroundImage = `url('${hero.img}')`;
+                back.style.backgroundImage  = `url('${hero.img}')`;
+                if (hero.currentMode === 'evo') {
+                    slot.classList.add('is-evo');
+                    tag.style.display = 'block';
+                } else {
+                    tag.style.display = 'none';
+                }
+            } else {
+                front.style.backgroundImage = '';
+                back.style.backgroundImage  = '';
+                slot.classList.remove('is-evo');
+                tag.style.display = 'none';
+            }
+        }
+
+        /* 戰術分析 */
+        const stats = {};
+        const active = selectedTeam.filter(Boolean);
+        active.forEach(h => {
+            h[h.currentMode].type.forEach(t => {
+                if (!t) return;
+                const key = mergeType[t] || t;
+                stats[key] = (stats[key] || 0) + 1;
+            });
+        });
+        const keys = Object.keys(stats).sort((a,b) => stats[b]-stats[a]);
+        document.getElementById('statPanel').innerHTML = keys.length
+            ? keys.map(k => `
+                <div class="stat-row">
+                    <div class="stat-label">${typeNames[k] || k}</div>
+                    <div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${(stats[k]/13)*100}%"></div></div>
+                    <div class="stat-count">${stats[k]}</div>
+                </div>`).join('')
+            : '<div style="color:#555; font-size:14px; text-align:center; margin-top:20px;">無戰術數據</div>';
+
+        /* 詳細說明 */
+        const infoList = document.getElementById('teamInfoList');
+        infoList.innerHTML = active.length
+            ? active.map(hero => {
+                const data = hero[hero.currentMode];
+                const evoHint = hero.canEvo
+                    ? hero.currentMode === 'evo'
+                        ? `<div style="font-size:14px; color:#fa1414; margin-top:3px;">鬪化技能</div>`
+                        : `<div style="font-size:14px; color:#999;    margin-top:3px;">基礎技能</div>`
+                    : `<div style="font-size:14px; color:#999;        margin-top:3px;">尚未開放鬪化</div>`;
+                return `
+                    <div class="info-card" style="border:2px solid var(--rarity-${hero.rarity})">
+                        <div style="display:flex; align-items:center; gap:10px">
+                            <div class="info-hero-img" style="background-image:url('${hero.img}')"></div>
+                            <div>
+                                <div style="font-weight:bold; font-size:18px; color:var(--accent-color)">${hero.name}</div>
+                                ${evoHint}
+                            </div>
+                        </div>
+                        <div style="font-size:14px; margin-top:5px; color:#ccc">${formatDescription(data.desc)}</div>
+                    </div>`;
+            }).join('')
+            : '<div style="color:#999; grid-column:1/3; text-align:center; margin-top:130px;">尚未選擇英雄</div>';
+
+        renderHeroes();
+    }
+
+    initSlots();
+    renderHeroes();
+    updateUI();
+</script>
+</body>
+</html>
