@@ -71,7 +71,7 @@
         .grid-item:hover { border-color: #0060df; background-color: #272727; }
         .grid-item img { width: 78%; height: 78%; object-fit: contain; display: none; }
         .slot-label { position: absolute; bottom: 5px; font-size: 10px; color: #555; }
-        
+
         /* ── Detail Panel ── */
         .detail-panel {
             width: 260px;
@@ -126,7 +126,7 @@
         /* 精靈石的 scroll-card 固定小高度 */
         .stone-row .scroll-card {
             flex: none;
-            height: 50px;   /* 一行的高度，自己調 */
+            height: 40px;   /* 一行的高度，自己調 */
         }
 
         .enchant-label {
@@ -152,6 +152,22 @@
         }
         select:focus { border-color: #555; }
 
+        /* 1. 包裹層：這決定了展開時推擠下方元素的力道 */
+        .scroll-card-wrap {
+            /* 移除固定 height: 90px，改由內容決定 */
+            display: grid;
+            grid-template-rows: 0fr; /* 關鍵：初始高度為 0 行 */
+            transition: grid-template-rows 0.5s ease-out; /* 平滑展開 */
+            overflow: hidden;
+        }
+
+        /* 3. 內容顯現後的樣式 */
+        .scroll-card.has-content {
+            padding: 8px 10px; /* 展開後恢復間距 */
+            opacity: 1;
+            transform: translateY(0);
+        }
+
         /* detail card 填滿剩餘空間 */
         .scroll-card {
             flex: 1;
@@ -163,11 +179,14 @@
             padding: 8px 10px;
             /* 無內容時完全透明，有內容時顯示 */
             opacity: 0;
-            transition: opacity 0.1s;
+            transform: translateY(-10px);
+            transition: opacity 0.3s ease, transform 0.4s ease, padding 0.3s ease;
         }
         .scroll-card.has-content { opacity: 1; }
 
         .base-row .scroll-card {
+            background: transparent; /* 將原本的顏色改為 transparent */
+            border: none !important;           /* 移除邊框 */
             flex: 1;
             opacity: 1;  /* 永遠顯示，不需要 has-content 控制 */
         }
@@ -275,13 +294,13 @@
         }
         .raid-item.pass {
             color: #00ffcc;
-            border-color: #1a3a35;
-            background: rgba(0,255,204,0.05);
+            /* border-color: #1a3a35; */
+            /* background: rgba(0,255,204,0.05); */
         }
         .raid-item.fail {
             color: #ff4d4d;
-            border-color: #3a1a1a;
-            background: rgba(255,77,77,0.05);
+            /* border-color: #3a1a1a; */
+            /* background: rgba(255,77,77,0.05); */
             cursor: pointer;
         }
         .raid-item.fail:hover { background: rgba(255,77,77,0.12); }
@@ -315,6 +334,66 @@
         .raid-stat-row .values { font-size: 12px; }
         .raid-stat-row.ok .values { color: #00ffcc; }
         .raid-stat-row.shortage .values { color: #ff4d4d; }
+
+        .grid-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .refine-panel {
+            width: 100%;   /* 跟 grid-wrapper 同寬，自動對齊 */
+            background: #1c1c1c;
+            border: 1px solid #2e2e2e;
+            border-radius: 10px;
+            padding: 10px 12px;
+            display: none; /* 沒選裝備時隱藏 */
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .refine-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+        }
+
+        .refine-label { width: 40px; color: #aaa; flex-shrink: 0; }
+
+        .refine-bar-wrap {
+            flex: 1;
+            height: 4px;
+            background: #333;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .refine-bar {
+            height: 100%;
+            background: #00ffcc;
+            border-radius: 2px;
+            transition: width 0.2s;
+        }
+
+        .refine-val { width: 28px; text-align: center; font-size: 11px; color: #eee; }
+        .refine-max-val { width: 20px; color: #555; font-size: 11px; }
+
+        .refine-btn {
+            width: 20px;
+            height: 20px;
+            background: #2a2a2a;
+            border: 1px solid #3a3a3a;
+            border-radius: 4px;
+            color: #aaa;
+            cursor: pointer;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .refine-btn:hover { border-color: #555; color: #fff; }
     </style>
 </head>
 <body>
@@ -326,33 +405,58 @@
         <div class="stat-item">攻擊速度 <input class="base-input" id="base-speed" type="number" value="0"></div>
         <div class="stat-item">暴擊率 <input class="base-input" id="base-crit" type="number" value="0"></div>
         <div class="stat-item">平衡 <input class="base-input" id="base-bal" type="number" value="0"></div>
+        <div class="stat-item">追加傷害 <input class="base-input" id="base-force" type="number" value="0"></div>
     </div>
 
     <h2>角色總能力值</h2>
     <div class="stat-box">
         <div class="stat-item">攻擊力     <span class="stat-value" id="total-atk">0</span></div>
         <div class="stat-item">攻擊速度   <span class="stat-value" id="total-speed">0</span></div>
-        <div class="stat-item">暴擊率     <span class="stat-value" id="total-crit">0</span>%</div>
+        <div class="stat-item">暴擊率     <span class="stat-value" id="total-crit">0</span></div>
         <div class="stat-item">平衡       <span class="stat-value" id="total-bal">0</span></div>
+        <div class="stat-item">追加傷害   <span class="stat-value" id="total-force">0</span></div>
     </div>
 </aside>
 
 <main class="main-content" id="mainArea">
+    <div class="grid-wrapper">
+        <div class="grid-container" id="gridContainer">
 
-    <div class="grid-container" id="gridContainer">
+            <div class="grid-item" data-type="earring" onclick="openEnchantDirect(this)">
+                <img class="equipped-img">
+                <span class="slot-label">耳環</span>
+                <div class="enchant-trigger" onclick="event.stopPropagation(); toggleTooltip(this.parentElement)">▶</div>
+            </div>
 
-        <div class="grid-item" data-type="earring" onclick="openEnchantDirect(this)">
-            <img class="equipped-img">
-            <span class="slot-label">耳環</span>
-            <div class="enchant-trigger" onclick="event.stopPropagation(); toggleTooltip(this.parentElement)">▶</div>
+            <div class="grid-item" data-type="head" onclick="openEnchantDirect(this)">
+                <img class="equipped-img">
+                <span class="slot-label">頭部</span>
+                <div class="enchant-trigger" onclick="event.stopPropagation(); toggleTooltip(this.parentElement)">▶</div>
+            </div>
+
+            <div class="grid-item" data-type="necklace" onclick="openEnchantDirect(this)">
+                <img class="equipped-img">
+                <span class="slot-label">項鍊</span>
+                <div class="enchant-trigger" onclick="event.stopPropagation(); toggleTooltip(this.parentElement)">▶</div>
+            </div>
+
+            <div class="grid-item" data-type="weapon" onclick="openEnchantDirect(this)">
+                <img class="equipped-img">
+                <span class="slot-label">武器</span>
+                <div class="enchant-trigger" onclick="event.stopPropagation(); toggleTooltip(this.parentElement)">▶</div>
+            </div>
+
+            <div class="grid-item" data-type="chest" onclick="openEnchantDirect(this)">
+                <img class="equipped-img">
+                <span class="slot-label">胸部</span>
+                <div class="enchant-trigger" onclick="event.stopPropagation(); toggleTooltip(this.parentElement)">▶</div>
+            </div>
+
+
+
         </div>
-
-        <div class="grid-item" data-type="head"     onclick="toggleTooltip(this)"><span class="slot-label">頭部</span><img class="equipped-img"></div>
-        <div class="grid-item" data-type="necklace" onclick="toggleTooltip(this)"><span class="slot-label">項鍊</span><img class="equipped-img"></div>
-        <div class="grid-item" data-type="weapon"   onclick="toggleTooltip(this)"><span class="slot-label">武器</span><img class="equipped-img"></div>
-        <div class="grid-item" data-type="chest"    onclick="toggleTooltip(this)"><span class="slot-label">胸部</span><img class="equipped-img"></div>
+        <div class="refine-panel" id="refinePanel"></div>
     </div>
-
     <!-- Detail Panel -->
     <div id="detailPanel" class="detail-panel">
         <h2 id="detailName">裝備名稱</h2>
@@ -412,19 +516,24 @@
     };
 
     const itemDb = {
-        earring:  [ { name: "聖所的耳環", img: "accessory/earring/聖所的耳環.png", stats: { crit: 5, bal: 3 } },
-                    { name: "太陽的悲願", img: "accessory/earring/太陽的悲願.png", stats: { speed: 2 } }
+        earring:  [ { name: "聖所的耳環", img: "accessory/earring/聖所的耳環.png", stats: { crit: 7, } },
+                    { name: "太陽的悲願", img: "accessory/earring/太陽的悲願.png", stats: { crit: 11, } },
                 ],
 
-        head:     [ { name: "埃柳頭盔", img: "gear/head/埃柳頭盔.png", stats: { speed: 2 }, set: "埃柳" },
+        head:     [ { name: "埃柳頭盔", img: "gear/head/埃柳頭盔.png", stats: { force: 900 }, set: "埃柳" },
 
         ],
 
         necklace: [ { name: "璀璨的貓咪項鍊", img: "accessory/necklace/璀璨的貓咪項鍊.png" }    
 
         ],
-        weapon:[ { name: "埃柳武器", img: "gear/weapon/埃柳武器.png", stats: { atk : 5}, set: "埃柳"}, 
-
+        weapon:[ { name: "埃柳武器", img: "gear/weapon/埃柳武器.png", 
+                   stats: { atk : 5}, set: "埃柳",
+                   refine: {
+                        crit: { max: 4 },
+                        bal:  { max: 5 },
+                    }
+                }
         ],
 
         chest: [ { name: "兀恩雅鏈甲", img: "gear/chest/兀恩雅鏈甲.png", stats: {atk : 5}, set: "兀恩雅"}, 
@@ -453,18 +562,19 @@
     };
 
     const raidDb = [
-        { name: "扭曲的懺悔",   require: { atk: 0, speed: 10, crit: 50, bal: 60 } },
-        { name: "貪婪的宴會廳", require: { atk: 0, speed: 12, crit: 55, bal: 65 } },
-        { name: "無法遵循的預言",require: { atk: 0, speed: 15, crit: 60, bal: 70 } },
-        { name: "遺忘正義的大教堂",require:{ atk: 0, speed: 18, crit: 65, bal: 75 } },
-        { name: "豐饒之森",     require: { atk: 0, speed: 20, crit: 70, bal: 80 } },
+        { name: "扭曲的懺悔",   require: { atk: 54290, crit: 284, bal: 144 } },
+        { name: "貪婪的宴會廳", require: { atk: 56920, crit: 290, bal: 152 } },
+        { name: "無法遵循的預言",require: { atk: 57620, crit: 300, bal: 160 } },
+        { name: "遺忘正義的大教堂",require:{ atk: 58120, crit: 312, bal: 168 } },
+        { name: "豐饒之森",     require: { atk: 60120, crit: 322, bal: 178 } },
+        { name: "天地交會之處", require: { atk: 63120, crit: 337, bal: 190 } },
     ];
-
-    const labels = { atk: '攻擊力', speed: '攻擊速度', crit: '暴擊率', bal: '平衡' };
+    /* 精煉自行增加項目 改完要對應const itemDb的refine項目 */
+    const labels = { atk: '攻擊力', speed: '攻擊速度', crit: '暴擊率', bal: '平衡' , force:'追加傷害'};
 
     let equippedState = {};
     Object.keys(itemDb).forEach(key => {
-        equippedState[key] = { name: "", top: null, end: null, stone: null };
+        equippedState[key] = { name: "", top: null, end: null, stone: null, refine: {} };
     });
 
     let currentType = "";
@@ -503,6 +613,7 @@
         imgEl.style.display = 'block';
         showDetail(item.name);
         document.getElementById('itemTooltip').style.display = 'none';
+        renderRefinePanel(currentType);
         calculateTotal();
     }
 
@@ -516,6 +627,7 @@
         currentType = type;
         currentSlotEl = el;
         showDetail(equippedState[currentType].name);
+        renderRefinePanel(currentType);
     }
 
     function showDetail(name) {
@@ -547,6 +659,21 @@
         }
     }
 
+    function toggleEnchantArea(show) {
+        const wrap = document.querySelector('.scroll-card-wrap');
+        const card = document.querySelector('.scroll-card');
+
+        if (show) {
+            // 展開：先填內容，再加 Class
+            wrap.classList.add('has-content');
+            card.classList.add('has-content');
+        } else {
+            // 收合
+            card.classList.remove('has-content');
+            wrap.classList.remove('has-content');
+        }
+    }
+
     function applyEnchant(type, scrollName) {
         equippedState[currentType][type] = scrollName;
         renderScrollCard(type, scrollName);
@@ -568,14 +695,58 @@
         card.classList.add('has-content');
     }
 
+    function renderRefinePanel(type) {
+        const panel = document.getElementById('refinePanel');
+        const item = itemDb[type]?.find(i => i.name === equippedState[type].name);
+    
+        if (!item?.refine) {
+            panel.style.display = 'none';
+            return;
+        }
+
+        panel.style.display = 'flex';
+        panel.innerHTML = Object.keys(item.refine).map(k => {
+            const max = item.refine[k].max;
+            const val = equippedState[type].refine[k] || 0;
+            const pct = max > 0 ? (val / max * 100) : 0;
+            return `
+            <div class="refine-row">
+                <span class="refine-label">${labels[k]}</span>
+                <div class="refine-bar-wrap">
+                    <div class="refine-bar" id="refBar-${k}" style="width:${pct}%"></div>
+                </div>
+                <span class="refine-val" id="refVal-${k}">${val}</span>
+                <span class="refine-max-val">/ ${max}</span>
+                <button class="refine-btn" onclick="adjustRefine('${type}','${k}',-1)">－</button>
+                <button class="refine-btn" onclick="adjustRefine('${type}','${k}',1)">＋</button>
+            </div>`;
+        }).join('');
+    }
+
+    function adjustRefine(type, stat, delta) {
+        const item = itemDb[type]?.find(i => i.name === equippedState[type].name);
+        const max = item.refine[stat].max;
+        const current = equippedState[type].refine[stat] || 0;
+        const newVal = Math.max(0, Math.min(max, current + delta));
+    
+        equippedState[type].refine[stat] = newVal;
+    
+        // 更新進度條和數值
+        document.getElementById(`refBar-${stat}`).style.width = (newVal / max * 100) + '%';
+        document.getElementById(`refVal-${stat}`).innerText = newVal;
+    
+        calculateTotal();
+    }
+
     // ── 計算核心：抽成獨立函式 ──
     function getCurrentTotal() {
-        let total = { atk: 0, speed: 0, crit: 0, bal: 0 };
+        let total = { atk: 0, speed: 0, crit: 0, bal: 0, force: 0, };
 
         total.atk   += parseInt(document.getElementById('base-atk').value)   || 0;
         total.speed += parseInt(document.getElementById('base-speed').value) || 0;
         total.crit  += parseInt(document.getElementById('base-crit').value)  || 0;
         total.bal   += parseInt(document.getElementById('base-bal').value)   || 0;
+        total.force += parseInt(document.getElementById('base-force').value) || 0;
 
         Object.keys(equippedState).forEach(slot => {
             const item = equippedState[slot];
@@ -583,6 +754,12 @@
                 const baseItem = itemDb[slot]?.find(i => i.name === item.name);
                 if (baseItem?.stats) {
                     Object.keys(total).forEach(k => total[k] += baseItem.stats[k] || 0);
+                }
+
+                if (baseItem?.refine && item.refine) {
+                    Object.keys(item.refine).forEach(k => {
+                        total[k] = (total[k] || 0) + (item.refine[k] || 0);
+                    });
                 }
             }
             ['top','end','stone'].forEach(t => {
@@ -619,8 +796,16 @@
         document.getElementById('total-speed').innerText = total.speed;
         document.getElementById('total-crit').innerText  = total.crit;
         document.getElementById('total-bal').innerText   = total.bal;
+        document.getElementById('total-force').innerText = total.force;
 
         renderRaidList(total);
+
+        // 新增：如果 raid detail 是開著的，即時更新
+        const raidDetail = document.getElementById('raidDetail');
+        const raidDetailName = document.getElementById('raidDetailName');
+        if (raidDetail.style.display === 'block' && raidDetailName.innerText) {
+            openRaidDetail(raidDetailName.innerText);
+        }
     }
 
     // ── Raid List ──
@@ -656,7 +841,7 @@
     }
 
     // ── 事件 ──
-    ['base-atk','base-speed','base-crit','base-bal'].forEach(id => {
+    ['base-atk','base-speed','base-crit','base-bal','base-force'].forEach(id => {
         document.getElementById(id).addEventListener('input', calculateTotal);
     });
 
