@@ -609,6 +609,10 @@
                     purple: { def:5578, force: 1035 },
                     orange: { def:5808, force: 1080 },
                     red:    { def:6158, force: 1125 },
+                },
+
+                refine: {
+                    def:  { max: 479, step: { plus: 50, minus: 10} },
                 }
             },
         ],
@@ -686,10 +690,6 @@
                     purple: { atk: 5 },
                     orange: { atk: 7 },
                     red:    { atk: 9 },
-                },
-                refine: {
-                    def:  { max: 479, step: { plus: 50, minus: 10} },
-                    bal:  { max: 5 },
                 }
             },
         ],
@@ -700,7 +700,7 @@
     // ══════════════════════════════════════════
     const setDb = {
         "兀恩雅": { 1:{bal:2},2:{bal:4},3:{bal:5},4:{bal:6},5:{bal:8},6:{bal:10} },
-        "埃柳":   { 1:{bal:3},2:{bal:6},3:{bal:7},4:{bal:8},5:{bal:10},6:{bal:12} }
+        "埃柳":   { 1:{def:120,bal:3},2:{def:240,bal:6},3:{def:485,bal:7},4:{def:615,bal:8},5:{def:615,bal:10},6:{def:680,bal:12} }
     };
 
     const raidDb = [
@@ -786,6 +786,7 @@
         document.getElementById('itemTooltip').style.display = 'none';
         renderRefinePanel(currentType);
         calculateTotal();
+        updateDetailTitle()
     }
 
     function openEnchantDirect(el) {
@@ -812,7 +813,7 @@
     //  顯示 Detail Panel
     // ══════════════════════════════════════════
     function showDetail(name) {
-        document.getElementById('detailName').innerText = name;
+        updateDetailTitle();
 
         ['top','end','stone'].forEach(t => {
             const select = document.getElementById(`${t}Select`);
@@ -853,6 +854,7 @@
         // 重新渲染素質卡片
         renderBaseStatCard();
         calculateTotal();
+        updateDetailTitle()
     }
 
     // ══════════════════════════════════════════
@@ -877,6 +879,7 @@
         equippedState[currentType][type] = scrollName;
         renderScrollCard(type, scrollName);
         calculateTotal();
+        updateDetailTitle()
     }
 
     function renderScrollCard(type, name) {
@@ -1045,6 +1048,18 @@
                     </div>`;
                 }).join('');
         document.getElementById('raidDetail').style.display = 'block';
+    }
+
+    function updateDetailTitle() {
+        const state = equippedState[currentType];
+        const rarityLabelMap = { '':'', green:'初級', blue:'中級', purple:'高級', orange:'稀有', red:'傳說' };
+        const parts = [
+            rarityLabelMap[state.rarity],
+            state.top,
+            state.end,
+            state.name
+        ].filter(Boolean).join(' ');
+        document.getElementById('detailName').innerText = parts;
     }
 
     // ══════════════════════════════════════════
