@@ -73,7 +73,7 @@
         .slot-label { position: absolute; bottom: 5px; font-size: 10px; color: #555; }
 
         /* ── 稀有度邊框顏色 ── */
-        .grid-item.rarity-white  { border-color: #aaaaaa; }
+        /*.grid-item.rarity-white  { border-color: #aaaaaa; }*/
         .grid-item.rarity-green  { border-color: #4caf50; }
         .grid-item.rarity-blue   { border-color: #2196f3; }
         .grid-item.rarity-purple { border-color: #9c27b0; }
@@ -82,7 +82,7 @@
 
         /* ── Detail Panel ── */
         .detail-panel {
-            width: 260px;
+            width: 340px;
             flex-shrink: 0;
             background: #1c1c1c;
             border: 1px solid #2e2e2e;
@@ -111,12 +111,14 @@
             min-height: 0;
         }
 
+        /*附魔資訊黑底框參數*/
         .enchant-row {
             flex: 1;
             min-height: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
+            display: grid;
+            grid-template-columns: 110px 1fr;  /* 左欄：標籤+選單，右欄：數值卡片 */
+            grid-template-rows: auto;
+            gap: 6px 10px;
             padding: 10px 12px;
             background: rgba(255,255,255,0.03);
             border: 1px solid #2a2a2a;
@@ -129,8 +131,7 @@
         }
 
         .stone-row .scroll-card {
-            flex: none;
-            height: 40px;
+            flex: 1;
         }
 
         .enchant-label {
@@ -141,6 +142,13 @@
             flex-shrink: 0;
         }
 
+        .enchant-left {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-self: stretch;
+        }
+        
         select {
             width: 100%;
             background: #2a2a2a;
@@ -153,6 +161,7 @@
             cursor: pointer;
             outline: none;
             flex-shrink: 0;
+            align-self: flex-start;
         }
         select:focus { border-color: #555; }
 
@@ -191,8 +200,10 @@
             opacity: 1;
             transform: translateY(0);
         }
-
+        
+        /*附魔資訊黑底框動畫參數*/
         .scroll-card {
+            align-self: stretch;
             flex: 1;
             min-height: 0;
             overflow-y: auto;
@@ -372,7 +383,8 @@
         .refine-label { width: 40px; color: #aaa; flex-shrink: 0; }
 
         .refine-bar-wrap {
-            flex: 1;
+            width: 85px;
+            flex: none;
             height: 4px;
             background: #333;
             border-radius: 2px;
@@ -385,8 +397,8 @@
             transition: width 0.2s;
         }
 
-        .refine-val { width: 28px; text-align: center; font-size: 11px; color: #eee; }
-        .refine-max-val { width: 20px; color: #555; font-size: 11px; }
+        .refine-val { width: 30px; text-align: right; font-size: 11px; color: #eee; }
+        .refine-max-val { width: 35px; color: #555; font-size: 11px; }
 
         .refine-btn {
             width: 20px;
@@ -411,19 +423,22 @@
     <h2>空裝素質</h2>
     <div class="stat-box">
         <div class="stat-item">攻擊力 <input class="base-input" id="base-atk" type="number" value="0"></div>
-        <div class="stat-item">攻擊速度 <input class="base-input" id="base-speed" type="number" value="0"></div>
+        <div class="stat-item">防禦力 <input class="base-input" id="base-def" type="number" value="0"></div>
         <div class="stat-item">暴擊率 <input class="base-input" id="base-crit" type="number" value="0"></div>
         <div class="stat-item">平衡 <input class="base-input" id="base-bal" type="number" value="0"></div>
         <div class="stat-item">追加傷害 <input class="base-input" id="base-force" type="number" value="0"></div>
+        <div class="stat-item">攻擊速度 <input class="base-input" id="base-speed" type="number" value="0"></div>
+        
     </div>
 
     <h2>角色總能力值</h2>
     <div class="stat-box">
         <div class="stat-item">攻擊力     <span class="stat-value" id="total-atk">0</span></div>
-        <div class="stat-item">攻擊速度   <span class="stat-value" id="total-speed">0</span></div>
+        <div class="stat-item">防禦力     <span class="stat-value" id="total-def">0</span></div>
         <div class="stat-item">暴擊率     <span class="stat-value" id="total-crit">0</span></div>
         <div class="stat-item">平衡       <span class="stat-value" id="total-bal">0</span></div>
         <div class="stat-item">追加傷害   <span class="stat-value" id="total-force">0</span></div>
+        <div class="stat-item">攻擊速度   <span class="stat-value" id="total-speed">0</span></div>
     </div>
 </aside>
 
@@ -476,6 +491,12 @@
                 <div class="enchant-trigger" onclick="event.stopPropagation(); toggleTooltip(this.parentElement)">▶</div>
             </div>
 
+            <div class="grid-item" data-type="gloves" onclick="openEnchantDirect(this)">
+                <img class="equipped-img">
+                <span class="slot-label">手部</span>
+                <div class="enchant-trigger" onclick="event.stopPropagation(); toggleTooltip(this.parentElement)">▶</div>
+            </div>
+
         </div>
         <div class="refine-panel" id="refinePanel"></div>
     </div>
@@ -488,38 +509,44 @@
 
             <!-- 裝備本身（含稀有度選擇） -->
             <div class="enchant-row base-row">
-                <span class="enchant-label">裝備素質</span>
+                <!--span class="enchant-label">裝備素質</span-->
                 <!-- ★ 新增：稀有度下拉選單，只在有 rarityStats 的裝備才顯示 -->
                 <select id="raritySelect" style="display:none" onchange="applyRarity(this.value)">
-                    <option value="">無色</option>
-                    <option value="green">🟩 綠色</option>
-                    <option value="blue">🟦 藍色</option>
-                    <option value="purple">🟪 紫色</option>
-                    <option value="orange">🟧 橘色</option>
-                    <option value="red">🟥 紅色</option>
+                    <option value="white">無色</option>
+                    <option value="green">🟩 初級</option>
+                    <option value="blue">🟦 中級</option>
+                    <option value="purple">🟪 高級</option>
+                    <option value="orange">🟧 稀有</option>
+                    <option value="red">🟥 傳說</option>
                 </select>
                 <div class="scroll-card has-content" id="baseStatCard"></div>
             </div>
 
             <!-- 字首 -->
             <div class="enchant-row">
-                <span class="enchant-label">字首</span>
-                <select id="topSelect" onchange="applyEnchant('top', this.value)"></select>
+                <div class="enchant-left">
+                    <span class="enchant-label">字首</span>
+                    <select id="topSelect" onchange="applyEnchant('top', this.value)"></select>
+                </div>
                 <div class="scroll-card" id="topDetail"></div>
             </div>
 
             <!-- 字尾 -->
             <div class="enchant-row">
-                <span class="enchant-label">字尾</span>
-                <select id="endSelect" onchange="applyEnchant('end', this.value)"></select>
+                <div class="enchant-left">
+                    <span class="enchant-label">字尾</span>
+                    <select id="endSelect" onchange="applyEnchant('end', this.value)"></select>
+                </div>
                 <div class="scroll-card" id="endDetail"></div>
             </div>
         </div>
 
         <!-- 精靈石 -->
         <div class="enchant-row stone-row">
-            <span class="enchant-label">精靈石</span>
-            <select id="stoneSelect" onchange="applyEnchant('stone', this.value)"></select>
+            <div class="enchant-left">
+                <span class="enchant-label">精靈石</span>
+                <select id="stoneSelect" onchange="applyEnchant('stone', this.value)"></select>
+            </div>
             <div class="scroll-card" id="stoneDetail"></div>
         </div>
     </div>
@@ -542,11 +569,11 @@
     //  稀有度設定
     // ══════════════════════════════════════════
     const rarityList = [
-        { key: "green",  label: "綠色" },
-        { key: "blue",   label: "藍色" },
-        { key: "purple", label: "紫色" },
-        { key: "orange", label: "橘色" },
-        { key: "red",    label: "紅色" },
+        { key: "green",  label: "初級" },
+        { key: "blue",   label: "中級" },
+        { key: "purple", label: "高級" },
+        { key: "orange", label: "稀有" },
+        { key: "red",    label: "傳說" },
     ];
 
     // ══════════════════════════════════════════
@@ -554,8 +581,8 @@
     // ══════════════════════════════════════════
     const enchantDb = {
         "隱藏的":   { type: "top",   slots: ["earring","necklace"], stats: { speed: 1 } },
-        "被遺忘的": { type: "top",   slots: ["helms","pants"],               stats: { speed: 2, crit: 3, bal: 4 } },
-        "鬥魂":     { type: "end",   slots: ["helms","pants"],               stats: { crit: 8 } },
+        "被遺忘的": { type: "top",   slots: ["helms","pants"],      stats: { speed: 2, crit: 3, bal: 4 } },
+        "鬥魂":     { type: "end",   slots: ["helms","pants"],      stats: { crit: 8 } },
         "暴擊+2":   { type: "stone", slots: ["earring","necklace"], stats: { crit: 2 } },
         "平衡+2":   { type: "stone", slots: ["earring","necklace"], stats: { bal: 2 } }
     };
@@ -573,15 +600,15 @@
 
         helms: [
             {
-                name: "埃柳頭盔", img: "gear/head/埃柳頭盔.png", set: "埃柳",
+                name: "埃柳頭盔", img: "gear/helms/埃柳頭盔.png", set: "埃柳",
                 // ★ 改成 rarityStats，每個稀有度填入對應數值
                 rarityStats: {
-                    white:  { force: 500 },
-                    green:  { force: 650 },
-                    blue:   { force: 800 },
-                    purple: { force: 900 },
-                    orange: { force: 1100 },
-                    red:    { force: 1300 },
+                    white:  { def:4888, force: 900 },
+                    green:  { def:5118, force: 945 },
+                    blue:   { def:5348, force: 990 },
+                    purple: { def:5578, force: 1035 },
+                    orange: { def:5808, force: 1080 },
+                    red:    { def:6158, force: 1125 },
                 }
             },
         ],
@@ -595,6 +622,26 @@
                 name: "埃柳武器", img: "gear/weapon/埃柳武器.png", set: "埃柳",
                 // ★ 改成 rarityStats
                 rarityStats: {
+                    white:  { atk: 37400, crit: 136, bal: 75, force: 4250, speed: 47},
+                    green:  { atk: 38650, crit: 137, bal: 76, force: 4400, speed: 47},
+                    blue:   { atk: 4 },
+                    purple: { atk: 5 },
+                    orange: { atk: 7 },
+                    red:    { atk: 9 },
+                },
+                refine: {
+                    atk:  { max: 2000, step: { plus: 100, minus: 10} },
+                    crit: { max: 4 },
+                    bal:  { max: 4 },
+                }
+            }
+        ],
+
+        tunics: [
+            {
+                name: "兀恩雅鏈甲", img: "gear/tunics/兀恩雅鏈甲.png", set: "兀恩雅",
+                // ★ 改成 rarityStats
+                rarityStats: {
                     white:  { atk: 2 },
                     green:  { atk: 3 },
                     blue:   { atk: 4 },
@@ -603,30 +650,15 @@
                     red:    { atk: 9 },
                 },
                 refine: {
-                    crit: { max: 4 },
+                    def:  { max: 400 },
                     bal:  { max: 5 },
-                }
-            }
-        ],
-
-        tunics: [
-            {
-                name: "兀恩雅鏈甲", img: "gear/chest/兀恩雅鏈甲.png", set: "兀恩雅",
-                // ★ 改成 rarityStats
-                rarityStats: {
-                    white:  { atk: 2 },
-                    green:  { atk: 3 },
-                    blue:   { atk: 4 },
-                    purple: { atk: 5 },
-                    orange: { atk: 7 },
-                    red:    { atk: 9 },
                 }
             },
         ],
 
         pants: [
             {
-                name: "兀恩雅護腿", img: "gear/chest/.png", set: "兀恩雅",
+                name: "兀恩雅護腿", img: "gear/pants/.png", set: "兀恩雅",
                 // ★ 改成 rarityStats
                 rarityStats: {
                     white:  { atk: 2 },
@@ -635,6 +667,29 @@
                     purple: { atk: 5 },
                     orange: { atk: 7 },
                     red:    { atk: 9 },
+                },
+                refine: {
+                    def:  { max: 400 },
+                    bal:  { max: 5 },
+                }
+            },
+        ],
+
+        gloves: [
+            {
+                name: "兀恩雅護手", img: "gear/gloves/兀恩雅護手.png", set: "兀恩雅",
+                // ★ 改成 rarityStats
+                rarityStats: {
+                    white:  { atk: 2 },
+                    green:  { atk: 3 },
+                    blue:   { atk: 4 },
+                    purple: { atk: 5 },
+                    orange: { atk: 7 },
+                    red:    { atk: 9 },
+                },
+                refine: {
+                    def:  { max: 479, step: { plus: 50, minus: 10} },
+                    bal:  { max: 5 },
                 }
             },
         ],
@@ -657,7 +712,7 @@
         { name: "天地交會之處",      require: { atk: 63120, crit: 337, bal: 190 } },
     ];
 
-    const labels = { atk:'攻擊力', speed:'攻擊速度', crit:'暴擊率', bal:'平衡', force:'追加傷害' };
+    const labels = { atk:'攻擊力', def:'防禦力', crit:'暴擊率', bal:'平衡', force:'追加傷害', speed:'攻擊速度'};
 
     // ══════════════════════════════════════════
     //  裝備狀態：★ 新增 rarity 欄位
@@ -718,7 +773,7 @@
         const item = itemDb[currentType][idx];
         equippedState[currentType].name = item.name;
         // ★ 選新裝備時重置稀有度為預設值
-        equippedState[currentType].rarity = "";
+        equippedState[currentType].rarity = "white";
 
         const imgEl = currentSlotEl.querySelector('img');
         imgEl.src = item.img;
@@ -777,7 +832,7 @@
 
         if (item.rarityStats) {
             raritySelect.style.display = 'block';
-            raritySelect.value = equippedState[currentType].rarity || "";
+            raritySelect.value = equippedState[currentType].rarity || "white";
         } else {
             raritySelect.style.display = 'none';
         }
@@ -852,6 +907,9 @@
         panel.innerHTML = Object.keys(item.refine).map(k => {
             const max = item.refine[k].max;
             const val = equippedState[type].refine[k] || 0;
+            const hasStep = !!item.refine[k].step;
+            const stepPlus  = item.refine[k].step?.plus  ?? 1;
+            const stepMinus = item.refine[k].step?.minus ?? 1;
             const pct = max > 0 ? (val / max * 100) : 0;
             return `
             <div class="refine-row">
@@ -861,10 +919,18 @@
                 </div>
                 <span class="refine-val" id="refVal-${k}">${val}</span>
                 <span class="refine-max-val">/ ${max}</span>
-                <button class="refine-btn" onclick="adjustRefine('${type}','${k}',-1)">－</button>
-                <button class="refine-btn" onclick="adjustRefine('${type}','${k}',1)">＋</button>
+                <button class="refine-btn" onclick="adjustRefine('${type}','${k}',${-stepMinus})">－</button>
+                <button class="refine-btn" onclick="adjustRefine('${type}','${k}',${stepPlus})">＋</button>
+                ${hasStep ? `<button class="refine-btn" onclick="clearRefine('${type}','${k}')">C</button>` : ''}
             </div>`;
         }).join('');
+    }
+
+    function clearRefine(type, stat) {
+        equippedState[type].refine[stat] = 0;
+        document.getElementById(`refBar-${stat}`).style.width = '0%';
+        document.getElementById(`refVal-${stat}`).innerText = 0;
+        calculateTotal();
     }
 
     function adjustRefine(type, stat, delta) {
@@ -882,13 +948,14 @@
     //  ★ 計算核心（改用 getItemStats 取稀有度素質）
     // ══════════════════════════════════════════
     function getCurrentTotal() {
-        let total = { atk: 0, speed: 0, crit: 0, bal: 0, force: 0 };
+        let total = { atk: 0, speed: 0, crit: 0, bal: 0, force: 0, def: 0};
 
         total.atk   += parseInt(document.getElementById('base-atk').value)   || 0;
         total.speed += parseInt(document.getElementById('base-speed').value) || 0;
         total.crit  += parseInt(document.getElementById('base-crit').value)  || 0;
         total.bal   += parseInt(document.getElementById('base-bal').value)   || 0;
         total.force += parseInt(document.getElementById('base-force').value) || 0;
+        total.def   += parseInt(document.getElementById('base-def').value)   || 0;
 
         Object.keys(equippedState).forEach(slot => {
             const state = equippedState[slot];
@@ -939,6 +1006,7 @@
         document.getElementById('total-crit').innerText  = total.crit;
         document.getElementById('total-bal').innerText   = total.bal;
         document.getElementById('total-force').innerText = total.force;
+        document.getElementById('total-def').innerText   = total.def;
         renderRaidList(total);
 
         const raidDetail = document.getElementById('raidDetail');
@@ -982,7 +1050,7 @@
     // ══════════════════════════════════════════
     //  事件
     // ══════════════════════════════════════════
-    ['base-atk','base-speed','base-crit','base-bal','base-force'].forEach(id => {
+    ['base-atk','base-speed','base-crit','base-bal','base-force','base-def'].forEach(id => {
         document.getElementById(id).addEventListener('input', calculateTotal);
     });
 
@@ -990,7 +1058,7 @@
         if (!e.target.closest('.grid-item') && !e.target.closest('#itemTooltip')) closeTooltip();
     });
 
-    renderRaidList({ atk: 0, speed: 0, crit: 0, bal: 0 });
+    renderRaidList({ atk: 0, speed: 0, crit: 0, bal: 0, def: 0 });
 </script>
 </body>
 </html>
