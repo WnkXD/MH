@@ -437,7 +437,7 @@
                 <div class="enchant-trigger" onclick="event.stopPropagation(); toggleTooltip(this.parentElement)">▶</div>
             </div>
 
-            <div class="grid-item" data-type="head" onclick="openEnchantDirect(this)">
+            <div class="grid-item" data-type="helms" onclick="openEnchantDirect(this)">
                 <img class="equipped-img">
                 <span class="slot-label">頭部</span>
                 <div class="enchant-trigger" onclick="event.stopPropagation(); toggleTooltip(this.parentElement)">▶</div>
@@ -455,9 +455,24 @@
                 <div class="enchant-trigger" onclick="event.stopPropagation(); toggleTooltip(this.parentElement)">▶</div>
             </div>
 
-            <div class="grid-item" data-type="chest" onclick="openEnchantDirect(this)">
+            <div class="grid-item" data-type="tunics" onclick="openEnchantDirect(this)">
                 <img class="equipped-img">
                 <span class="slot-label">胸部</span>
+                <div class="enchant-trigger" onclick="event.stopPropagation(); toggleTooltip(this.parentElement)">▶</div>
+            </div>
+
+            <div class="grid-item" data-type="totem" onclick="openEnchantDirect(this)">
+                <img class="equipped-img">
+                <span class="slot-label">護符</span>
+                <div class="enchant-trigger" onclick="event.stopPropagation(); toggleTooltip(this.parentElement)">▶</div>
+            </div>
+
+            <div>
+            </div>
+
+            <div class="grid-item" data-type="pants" onclick="openEnchantDirect(this)">
+                <img class="equipped-img">
+                <span class="slot-label">腿部</span>
                 <div class="enchant-trigger" onclick="event.stopPropagation(); toggleTooltip(this.parentElement)">▶</div>
             </div>
 
@@ -539,8 +554,8 @@
     // ══════════════════════════════════════════
     const enchantDb = {
         "隱藏的":   { type: "top",   slots: ["earring","necklace"], stats: { speed: 1 } },
-        "被遺忘的": { type: "top",   slots: ["head"],               stats: { speed: 2, crit: 3, bal: 4 } },
-        "鬥魂":     { type: "end",   slots: ["head"],               stats: { crit: 8 } },
+        "被遺忘的": { type: "top",   slots: ["helms","pants"],               stats: { speed: 2, crit: 3, bal: 4 } },
+        "鬥魂":     { type: "end",   slots: ["helms","pants"],               stats: { crit: 8 } },
         "暴擊+2":   { type: "stone", slots: ["earring","necklace"], stats: { crit: 2 } },
         "平衡+2":   { type: "stone", slots: ["earring","necklace"], stats: { bal: 2 } }
     };
@@ -556,7 +571,7 @@
             { name: "太陽的悲願", img: "accessory/earring/太陽的悲願.png", stats: { crit: 11 } },
         ],
 
-        head: [
+        helms: [
             {
                 name: "埃柳頭盔", img: "gear/head/埃柳頭盔.png", set: "埃柳",
                 // ★ 改成 rarityStats，每個稀有度填入對應數值
@@ -572,7 +587,7 @@
         ],
 
         necklace: [
-            { name: "璀璨的貓咪項鍊", img: "accessory/necklace/璀璨的貓咪項鍊.png" }
+            { name: "璀璨的貓咪項鍊", img: "accessory/necklace/璀璨的貓咪項鍊.png" },
         ],
 
         weapon: [
@@ -594,9 +609,24 @@
             }
         ],
 
-        chest: [
+        tunics: [
             {
                 name: "兀恩雅鏈甲", img: "gear/chest/兀恩雅鏈甲.png", set: "兀恩雅",
+                // ★ 改成 rarityStats
+                rarityStats: {
+                    white:  { atk: 2 },
+                    green:  { atk: 3 },
+                    blue:   { atk: 4 },
+                    purple: { atk: 5 },
+                    orange: { atk: 7 },
+                    red:    { atk: 9 },
+                }
+            },
+        ],
+
+        pants: [
+            {
+                name: "兀恩雅護腿", img: "gear/chest/.png", set: "兀恩雅",
                 // ★ 改成 rarityStats
                 rarityStats: {
                     white:  { atk: 2 },
@@ -650,7 +680,7 @@
 
         // ★ 有 rarityStats → 讀對應稀有度；否則讀 stats
         if (item.rarityStats) {
-            const rarity = equippedState[slot].rarity || "purple";
+            const rarity = equippedState[slot].rarity || "";
             return item.rarityStats[rarity] || {};
         }
         return item.stats || {};
