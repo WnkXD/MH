@@ -512,7 +512,7 @@
                 <!--span class="enchant-label">裝備素質</span-->
                 <!-- ★ 新增：稀有度下拉選單，只在有 rarityStats 的裝備才顯示 -->
                 <select id="raritySelect" style="display:none" onchange="applyRarity(this.value)">
-                    <option value="white">無色</option>
+                    <option value="white">普通</option>
                     <option value="green">🟩 初級</option>
                     <option value="blue">🟦 中級</option>
                     <option value="purple">🟪 高級</option>
@@ -583,8 +583,8 @@
         "隱藏的":   { type: "top",   slots: ["earring","necklace"], stats: { speed: 1 } },
         "被遺忘的": { type: "top",   slots: ["helms","pants"],      stats: { speed: 2, crit: 3, bal: 4 } },
         "鬥魂":     { type: "end",   slots: ["helms","pants"],      stats: { crit: 8 } },
-        "暴擊+2":   { type: "stone", slots: ["earring","necklace"], stats: { crit: 2 } },
-        "平衡+2":   { type: "stone", slots: ["earring","necklace"], stats: { bal: 2 } }
+        "暴擊+2":   { type: "stone", slots: ["earring","necklace","weapon"], stats: { crit: 2 } },
+        "平衡+2":   { type: "stone", slots: ["earring","necklace","weapon"], stats: { bal: 2 } },
     };
 
     // ══════════════════════════════════════════
