@@ -116,7 +116,7 @@
             flex: 1;
             min-height: 0;
             display: grid;
-            grid-template-columns: 110px 1fr;  /* 左欄：標籤+選單，右欄：數值卡片 */
+            grid-template-columns: 120px 1fr;  /* 左欄：標籤+選單，右欄：數值卡片 */
             grid-template-rows: auto;
             gap: 6px 10px;
             padding: 10px 12px;
@@ -422,10 +422,10 @@
 <aside class="sidebar">
     <h2>空裝素質</h2>
     <div class="stat-box">
-        <div class="stat-item">攻擊力 <input class="base-input" id="base-atk" type="number" value="0"></div>
-        <div class="stat-item">防禦力 <input class="base-input" id="base-def" type="number" value="0"></div>
-        <div class="stat-item">暴擊率 <input class="base-input" id="base-crit" type="number" value="0"></div>
-        <div class="stat-item">平衡 <input class="base-input" id="base-bal" type="number" value="0"></div>
+        <div class="stat-item">攻擊力   <input class="base-input" id="base-atk" type="number" value="0"></div>
+        <div class="stat-item">防禦力   <input class="base-input" id="base-def" type="number" value="0"></div>
+        <div class="stat-item">暴擊率   <input class="base-input" id="base-crit" type="number" value="0"></div>
+        <div class="stat-item">平衡     <input class="base-input" id="base-bal" type="number" value="0"></div>
         <div class="stat-item">追加傷害 <input class="base-input" id="base-force" type="number" value="0"></div>
         <div class="stat-item">攻擊速度 <input class="base-input" id="base-speed" type="number" value="0"></div>
         
@@ -438,6 +438,7 @@
         <div class="stat-item">暴擊率     <span class="stat-value" id="total-crit">0</span></div>
         <div class="stat-item">平衡       <span class="stat-value" id="total-bal">0</span></div>
         <div class="stat-item">追加傷害   <span class="stat-value" id="total-force">0</span></div>
+        <div class="stat-item">防禦力貫穿 <span class="stat-value" id="total-pen">0</span></div>
         <div class="stat-item">攻擊速度   <span class="stat-value" id="total-speed">0</span></div>
     </div>
 </aside>
@@ -476,7 +477,7 @@
                 <div class="enchant-trigger" onclick="event.stopPropagation(); toggleTooltip(this.parentElement)">▶</div>
             </div>
 
-            <div class="grid-item" data-type="totem" onclick="openEnchantDirect(this)">
+            <div class="grid-item" data-type="totems" onclick="openEnchantDirect(this)">
                 <img class="equipped-img">
                 <span class="slot-label">護符</span>
                 <div class="enchant-trigger" onclick="event.stopPropagation(); toggleTooltip(this.parentElement)">▶</div>
@@ -494,6 +495,18 @@
             <div class="grid-item" data-type="gloves" onclick="openEnchantDirect(this)">
                 <img class="equipped-img">
                 <span class="slot-label">手部</span>
+                <div class="enchant-trigger" onclick="event.stopPropagation(); toggleTooltip(this.parentElement)">▶</div>
+            </div>
+
+            <div class="grid-item" data-type="belts" onclick="openEnchantDirect(this)">
+                <img class="equipped-img">
+                <span class="slot-label">腰帶</span>
+                <div class="enchant-trigger" onclick="event.stopPropagation(); toggleTooltip(this.parentElement)">▶</div>
+            </div>
+
+            <div class="grid-item" data-type="foots" onclick="openEnchantDirect(this)">
+                <img class="equipped-img">
+                <span class="slot-label">腳部</span>
                 <div class="enchant-trigger" onclick="event.stopPropagation(); toggleTooltip(this.parentElement)">▶</div>
             </div>
 
@@ -518,6 +531,28 @@
                     <option value="purple">🟪 高級</option>
                     <option value="orange">🟧 稀有</option>
                     <option value="red">🟥 傳說</option>
+                </select>
+                <select id="upgradeSelect" style="display:none" onchange="applyUpgrade(this.value)">
+                    <option value="20">+20</option>
+                    <option value="19">+19</option>
+                    <option value="18">+18</option>
+                    <option value="17">+17</option>
+                    <option value="16">+16</option>
+                    <option value="15">+15</option>
+                    <option value="14">+14</option>
+                    <option value="13">+13</option>
+                    <option value="12">+12</option>
+                    <option value="11">+11</option>
+                    <option value="10">+10</option>
+                    <option value="9">+9</option>
+                    <option value="8">+8</option>
+                    <option value="7">+7</option>
+                    <option value="6">+6</option>
+                    <option value="5">+5</option>
+                    <option value="4">+4</option>
+                    <option value="3">+3</option>
+                    <option value="2">+2</option>
+                    <option value="1">+1</option>
                 </select>
                 <div class="scroll-card has-content" id="baseStatCard"></div>
             </div>
@@ -583,8 +618,8 @@
         "隱藏的":   { type: "top",   slots: ["earring","necklace"], stats: { speed: 1 } },
         "被遺忘的": { type: "top",   slots: ["helms","pants"],      stats: { speed: 2, crit: 3, bal: 4 } },
         "鬥魂":     { type: "end",   slots: ["helms","pants"],      stats: { crit: 8 } },
-        "暴擊+2":   { type: "stone", slots: ["earring","necklace","weapon"], stats: { crit: 2 } },
-        "平衡+2":   { type: "stone", slots: ["earring","necklace","weapon"], stats: { bal: 2 } },
+        "暴擊+2":   { type: "stone", slots: ["earring","necklace","weapon","totems","belts",], stats: { crit: 2 } },
+        "平衡+2":   { type: "stone", slots: ["earring","necklace","weapon","totems","belts",], stats: { bal: 2 } },
     };
 
     // ══════════════════════════════════════════
@@ -594,14 +629,20 @@
     // ══════════════════════════════════════════
     const itemDb = {
         earring: [
-            { name: "聖所的耳環", img: "accessory/earring/聖所的耳環.png", stats: { crit: 7 } },
+            { name: "豐饒之根", img: "accessory/earring/豐饒之根.png", stats: { crit: 15 },
+              upgrade: { 0:{}, 1:{ atk: 16, pen: 7}, 2:{atk: 32, pen: 13}, 3:{atk: 48, pen: 20}, 4:{atk: 64, pen: 26}, 5:{atk: 80, pen: 33},
+                         6:{atk: 96, pen: 39}, 7:{atk: 112, pen: 46}, 8:{atk: 128, pen: 52}, 9:{atk: 144, pen: 59}, 10:{atk: 160, pen: 65},
+                         11:{atk: 176, pen: 72}, 12:{atk: 192, pen: 78}, 13:{atk: 208, pen: 85}, 14:{atk: 224, pen: 91}, 15:{atk: 240, pen: 98}, 
+                         16:{atk: 256, pen: 104}, 17:{atk: 272, pen: 111}, 18:{atk: 288, pen: 117}, 19:{atk: 304, pen: 124}, 20:{atk: 320, pen: 130},
+                        }
+              },
             { name: "太陽的悲願", img: "accessory/earring/太陽的悲願.png", stats: { crit: 11 } },
+            { name: "聖所的耳環", img: "accessory/earring/聖所的耳環.png", stats: { crit: 7 } },
         ],
 
         helms: [
             {
                 name: "埃柳頭盔", img: "gear/helms/埃柳頭盔.png", set: "埃柳",
-                // ★ 改成 rarityStats，每個稀有度填入對應數值
                 rarityStats: {
                     white:  { def:4888, force: 900 },
                     green:  { def:5118, force: 945 },
@@ -610,28 +651,55 @@
                     orange: { def:5808, force: 1080 },
                     red:    { def:6158, force: 1125 },
                 },
+                refine: { def:  { max: 479, step: { plus: 50, minus: 10} }, }
+            },
 
-                refine: {
-                    def:  { max: 479, step: { plus: 50, minus: 10} },
-                }
+            {
+                name: "兀恩雅頭盔", img: "gear/helms/兀恩雅頭盔.png", set: "兀恩雅",
+                rarityStats: {
+                    white:  { def:4338, force: 750 },
+                    green:  { def:4448, force: 780 },
+                    blue:   { def:4558, force: 810 },
+                    purple: { def:4668, force: 840 },
+                    orange: { def:4778, force: 870 },
+                    red:    { def:4888, force: 900 },
+                },
+                refine: { def:  { max: 479, step: { plus: 50, minus: 10} }, }
             },
         ],
 
         necklace: [
-            { name: "璀璨的貓咪項鍊", img: "accessory/necklace/璀璨的貓咪項鍊.png" },
+            { name: "璀璨的貓咪項鍊", img: "accessory/necklace/璀璨的貓咪項鍊.png", stats: { crit: 2, bal: 2 } },
         ],
 
         weapon: [
             {
                 name: "埃柳武器", img: "gear/weapon/埃柳武器.png", set: "埃柳",
-                // ★ 改成 rarityStats
                 rarityStats: {
                     white:  { atk: 37400, crit: 136, bal: 75, force: 4250, speed: 47},
                     green:  { atk: 38650, crit: 137, bal: 76, force: 4400, speed: 47},
-                    blue:   { atk: 4 },
+                    blue:   { atk: 39900, crit: 138, bal: 77, force: 4550, speed: 47},
                     purple: { atk: 5 },
                     orange: { atk: 7 },
                     red:    { atk: 9 },
+                },
+                refine: {
+                    atk:  { max: 2000, step: { plus: 100, minus: 10} },
+                    crit: { max: 4 },
+                    bal:  { max: 4 },
+                }
+            },
+
+            {
+                name: "兀恩雅武器", img: "gear/weapon/兀恩雅武器.png", set: "兀恩雅",
+                // ★ 改成 rarityStats
+                rarityStats: {
+                    white:  { atk: 34900, crit: 128, bal: 67, force: 3750, speed: 47},
+                    green:  { atk: 35400, crit: 128, bal: 67, force: 3850, speed: 47},
+                    blue:   { atk: 35900, crit: 128, bal: 67, force: 3950, speed: 47},
+                    purple: { atk: 36400, crit: 128, bal: 67, force: 4050, speed: 47},
+                    orange: { atk: 36900, crit: 128, bal: 67, force: 4150, speed: 47},
+                    red:    { atk: 37400, crit: 128, bal: 67, force: 4250, speed: 47},
                 },
                 refine: {
                     atk:  { max: 2000, step: { plus: 100, minus: 10} },
@@ -644,53 +712,83 @@
         tunics: [
             {
                 name: "兀恩雅鏈甲", img: "gear/tunics/兀恩雅鏈甲.png", set: "兀恩雅",
-                // ★ 改成 rarityStats
                 rarityStats: {
-                    white:  { atk: 2 },
-                    green:  { atk: 3 },
-                    blue:   { atk: 4 },
-                    purple: { atk: 5 },
-                    orange: { atk: 7 },
-                    red:    { atk: 9 },
+                    white:  { def: 4508, force: 750 },
+                    green:  { def: 4618, force: 780 },
+                    blue:   { def: 4728, force: 810 },
+                    purple: { def: 4838, force: 840 },
+                    orange: { def: 4948, force: 870 },
+                    red:    { def: 5058, force: 900 },
                 },
-                refine: {
-                    def:  { max: 400 },
-                    bal:  { max: 5 },
-                }
+                refine: { def:  { max: 596, step: { plus:50, minus:10 } }, }
             },
+        ],
+
+        totems: [
+            { name: "埃柳之書", img: "accessory/totems/埃柳之書.png", stats: { atk: 1410, crit: 10, speed: 3}, },
+            { name: "兀恩雅之書", img: "accessory/totems/兀恩雅之書.png", stats: { atk: 1410, crit: 10, speed: 3}, },
         ],
 
         pants: [
             {
-                name: "兀恩雅護腿", img: "gear/pants/.png", set: "兀恩雅",
-                // ★ 改成 rarityStats
+                name: "埃柳護脛", img: "gear/pants/埃柳護脛.png", set: "埃柳",
                 rarityStats: {
-                    white:  { atk: 2 },
-                    green:  { atk: 3 },
-                    blue:   { atk: 4 },
-                    purple: { atk: 5 },
-                    orange: { atk: 7 },
-                    red:    { atk: 9 },
+                    white:  { def: 4843, force: 900 },
+                    green:  { def: 5093, force: 945 },
+                    blue:   { def: 5343, force: 990 },
+                    purple: { def: 5643, force: 1035 },
+                    orange: { def: 5943, force: 1080 },
+                    red:    { def: 6243, force: 1125 },
                 },
-                refine: {
-                    def:  { max: 400 },
-                    bal:  { max: 5 },
-                }
+                refine: { def:  { max: 567, step: { plus: 50, minus:10 } }, }
+            },
+
+            {
+                name: "兀恩雅護脛", img: "gear/pants/兀恩雅護脛.png", set: "兀恩雅",
+                rarityStats: {
+                    white:  { def: 4293, force: 750 },
+                    green:  { def: 4403, force: 780 },
+                    blue:   { def: 4513, force: 810 },
+                    purple: { def: 4623, force: 840 },
+                    orange: { def: 4733, force: 870 },
+                    red:    { def: 4843, force: 900 },
+                },
+                refine: { def:  { max: 567, step: { plus: 50, minus:10 } }, }
             },
         ],
 
         gloves: [
             {
                 name: "兀恩雅護手", img: "gear/gloves/兀恩雅護手.png", set: "兀恩雅",
-                // ★ 改成 rarityStats
                 rarityStats: {
-                    white:  { atk: 2 },
-                    green:  { atk: 3 },
-                    blue:   { atk: 4 },
-                    purple: { atk: 5 },
-                    orange: { atk: 7 },
-                    red:    { atk: 9 },
-                }
+                    white:  { def:4338, force: 750 },
+                    green:  { def:4448, force: 780 },
+                    blue:   { def:4558, force: 810 },
+                    purple: { def:4668, force: 840 },
+                    orange: { def:4778, force: 870 },
+                    red:    { def:4888, force: 900 },
+                },
+                refine: { def:  { max: 479, step: { plus: 50, minus: 10} }, }
+            },
+        ],
+
+        belts: [
+            { name: "詛咒腰帶", img: "accessory/belts/詛咒腰帶.png", stats: { bal: 12 } },
+            { name: "鬥爭腰帶", img: "accessory/belts/鬥爭腰帶.png", stats: { bal: 8 } },
+        ],
+
+        foots: [
+            {
+                name: "兀恩雅靴子", img: "gear/boots/兀恩雅靴子.png", set: "兀恩雅",
+                rarityStats: {
+                    white:  { def:4338, force: 750 },
+                    green:  { def:4448, force: 780 },
+                    blue:   { def:4558, force: 810 },
+                    purple: { def:4668, force: 840 },
+                    orange: { def:4778, force: 870 },
+                    red:    { def:4888, force: 900 },
+                },
+                refine: { def:  { max: 479, step: { plus: 50, minus: 10} }, }
             },
         ],
     };
@@ -712,14 +810,14 @@
         { name: "天地交會之處",      require: { atk: 63120, crit: 337, bal: 190 } },
     ];
 
-    const labels = { atk:'攻擊力', def:'防禦力', crit:'暴擊率', bal:'平衡', force:'追加傷害', speed:'攻擊速度'};
+    const labels = { atk:'攻擊力', def:'防禦力', crit:'暴擊率', bal:'平衡', force:'追加傷害', pen:'防禦力貫穿', speed:'攻擊速度'};
 
     // ══════════════════════════════════════════
     //  裝備狀態：★ 新增 rarity 欄位
     // ══════════════════════════════════════════
     let equippedState = {};
     Object.keys(itemDb).forEach(key => {
-        equippedState[key] = { name: "", top: null, end: null, stone: null, refine: {}, rarity: "" };
+        equippedState[key] = { name: "", top: null, end: null, stone: null, refine: {}, rarity: "", upgradeLevel: 0 };
         //                                                                              ↑ 預設稀有度
     });
 
@@ -737,6 +835,14 @@
         if (item.rarityStats) {
             const rarity = equippedState[slot].rarity || "";
             return item.rarityStats[rarity] || {};
+        }
+
+        if (item.upgrade) {
+            const level = equippedState[slot].upgradeLevel || 0;
+            const base = { ...(item.stats || {}) };
+            const bonus = item.upgrade[level] || {};
+            Object.keys(bonus).forEach(k => base[k] = (base[k] || 0) + bonus[k]);
+            return base;
         }
         return item.stats || {};
     }
@@ -830,12 +936,19 @@
         // ★ 稀有度選單：有 rarityStats 才顯示
         const item = itemDb[currentType].find(i => i.name === name);
         const raritySelect = document.getElementById('raritySelect');
+        const upgradeSelect  = document.getElementById('upgradeSelect');
 
         if (item.rarityStats) {
             raritySelect.style.display = 'block';
+            upgradeSelect.style.display  = 'none';
             raritySelect.value = equippedState[currentType].rarity || "white";
+        } else if (item.upgrade) {
+            upgradeSelect.style.display = 'block';
+            raritySelect.style.display = 'none';
+            upgradeSelect.value = equippedState[currentType].upgradeLevel || 0;
         } else {
             raritySelect.style.display = 'none';
+            upgradeSelect.style.display  = 'none';
         }
 
         // 渲染裝備素質卡片
@@ -946,19 +1059,26 @@
         document.getElementById(`refVal-${stat}`).innerText = val;
         calculateTotal();
     }
+    //飾品等級
+    function applyUpgrade(level) {
+        equippedState[currentType].upgradeLevel = parseInt(level);
+        renderBaseStatCard();
+        calculateTotal();
+        updateDetailTitle();
+    }
 
     // ══════════════════════════════════════════
     //  ★ 計算核心（改用 getItemStats 取稀有度素質）
     // ══════════════════════════════════════════
     function getCurrentTotal() {
-        let total = { atk: 0, speed: 0, crit: 0, bal: 0, force: 0, def: 0};
+        let total = { atk: 0, def: 0, crit: 0, bal: 0, force: 0, pen: 0, speed: 0};
 
         total.atk   += parseInt(document.getElementById('base-atk').value)   || 0;
-        total.speed += parseInt(document.getElementById('base-speed').value) || 0;
+        total.def   += parseInt(document.getElementById('base-def').value)   || 0;
         total.crit  += parseInt(document.getElementById('base-crit').value)  || 0;
         total.bal   += parseInt(document.getElementById('base-bal').value)   || 0;
         total.force += parseInt(document.getElementById('base-force').value) || 0;
-        total.def   += parseInt(document.getElementById('base-def').value)   || 0;
+        total.speed += parseInt(document.getElementById('base-speed').value) || 0;
 
         Object.keys(equippedState).forEach(slot => {
             const state = equippedState[slot];
@@ -1010,6 +1130,7 @@
         document.getElementById('total-bal').innerText   = total.bal;
         document.getElementById('total-force').innerText = total.force;
         document.getElementById('total-def').innerText   = total.def;
+        document.getElementById('total-pen').innerText   = total.pen;
         renderRaidList(total);
 
         const raidDetail = document.getElementById('raidDetail');
@@ -1053,8 +1174,10 @@
     function updateDetailTitle() {
         const state = equippedState[currentType];
         const rarityLabelMap = { '':'', green:'初級', blue:'中級', purple:'高級', orange:'稀有', red:'傳說' };
+        const upgradeLabel = state.upgradeLevel > 0 ? `+${state.upgradeLevel}` : '';
         const parts = [
             rarityLabelMap[state.rarity],
+            upgradeLabel,
             state.top,
             state.end,
             state.name
@@ -1065,7 +1188,7 @@
     // ══════════════════════════════════════════
     //  事件
     // ══════════════════════════════════════════
-    ['base-atk','base-speed','base-crit','base-bal','base-force','base-def'].forEach(id => {
+    ['base-atk','base-speed','base-crit','base-bal','base-force','base-def','base-pen'].forEach(id => {
         document.getElementById(id).addEventListener('input', calculateTotal);
     });
 
@@ -1073,7 +1196,7 @@
         if (!e.target.closest('.grid-item') && !e.target.closest('#itemTooltip')) closeTooltip();
     });
 
-    renderRaidList({ atk: 0, speed: 0, crit: 0, bal: 0, def: 0 });
+    renderRaidList({ atk: 0, def: 0, crit: 0, bal: 0, pen: 0, speed: 0 });
 </script>
 </body>
 </html>
