@@ -426,9 +426,6 @@
         <div class="stat-item">防禦力   <input class="base-input" id="base-def" type="number" value="0"></div>
         <div class="stat-item">暴擊率   <input class="base-input" id="base-crit" type="number" value="0"></div>
         <div class="stat-item">平衡     <input class="base-input" id="base-bal" type="number" value="0"></div>
-        <div class="stat-item">追加傷害 <input class="base-input" id="base-force" type="number" value="0"></div>
-        <div class="stat-item">攻擊速度 <input class="base-input" id="base-speed" type="number" value="0"></div>
-        <div class="stat-item">力量     <input class="base-input" id="base-str" type="number" value="0"></div>
         <div class="stat-item">敏捷     <input class="base-input" id="base-agi" type="number" value="0"></div>
     </div>
 
@@ -616,9 +613,36 @@
     //  附魔資料庫（不變）
     // ══════════════════════════════════════════
     const enchantDb = {
-        "隱藏的":   { type: "top",   slots: ["earring","necklace"], stats: { speed: 1 } },
-        "被遺忘的": { type: "top",   slots: ["helms","pants"],      stats: { speed: 2, crit: 3, bal: 4 } },
-        "鬥魂":     { type: "end",   slots: ["helms","pants"],      stats: { crit: 8 } },
+        //武器字首
+        "悲劇的":   { type: "top",   slots: ["weapon"],             stats: { atk: 700, speed: 8, crit: 8, bal: 4 } },
+        "復仇的":   { type: "top",   slots: ["weapon"],             stats: { atk: 550, speed: 8, crit: 6, bal: 2 } },
+        //武器字尾
+        "一擊":     { type: "end",   slots: ["weapon"],             stats: { atk: 1030, speed: 3, crit: 10, bal: -1 } },
+        "怨恨":     { type: "end",   slots: ["weapon"],             stats: { atk: 1000, speed: 3, crit: 7, bal: -1 } },
+        //頭腿字首
+        "滿盈的":   { type: "top",   slots: ["helms","pants"],      stats: { atk: 245, def: 200, speed: 2, crit: 3, bal: 6 } },
+        "被遺忘的": { type: "top",   slots: ["helms","pants"],      stats: { atk: 245, def: 200, speed: 2, crit: 3, bal: 4 } },
+        //頭腿字尾
+        "鬥魂":     { type: "end",   slots: ["helms","pants"],      stats: { atk: 285, def: 280, crit: 8 } },
+        "進擊":     { type: "end",   slots: ["helms","pants"],      stats: { atk: 285, def: 280, crit: 5 } },
+        //手腳字首
+        "優雅的":   { type: "top",   slots: ["gloves","foots"],     stats: { atk: 145, def: 300, speed: 2, crit: 4, bal: 5 } } ,
+        "悲痛的":   { type: "top",   slots: ["gloves","foots"],     stats: { atk: 145, def: 300, speed: 2, crit: 3, bal: 4 } } ,
+        //手腳字尾
+        "孤獨":     { type: "end",   slots: ["gloves","foots"],     stats: { atk: 465, def: -300, speed: 1, bal: 10 } } ,
+        "狂暴":     { type: "end",   slots: ["gloves","foots"],     stats: { atk: 465, def: -300, speed: 1, bal: 7 } } ,
+        //書字首
+        "虛無的":   { type: "top",   slots: ["totems"],             stats: { speed: 1, def: 1000, crit: 4 } } ,
+        "勝者的":   { type: "top",   slots: ["totems"],             stats: { speed: 1, def: 800, crit: 2 } } ,
+        "激烈的":   { type: "top",   slots: ["totems"],             stats: { speed: 1, def: 800, crit: 1 } } ,
+        //書字尾
+        "讚揚":     { type: "end",   slots: ["totems"],             stats: { atk: 230, crit: 4 } } ,
+        "瘋狂":     { type: "end",   slots: ["totems"],             stats: { atk: 230, crit: 2 } } ,
+        //飾品字首
+        "隱藏的":   { type: "top",   slots: ["earring","necklace"], stats: { atk: 700, speed: 1 } },
+        "扭曲的":   { type: "top",   slots: ["earring","necklace"], stats: { atk: 450, speed: 1 } },
+        "深刻的":   { type: "top",   slots: ["earring","necklace"], stats: { atk: 200, speed: 1 } },
+        //精靈石
         "暴擊+2":   { type: "stone", slots: ["earring","necklace","weapon","totems","belts",], stats: { crit: 2 } },
         "平衡+2":   { type: "stone", slots: ["earring","necklace","weapon","totems","belts",], stats: { bal: 2 } },
     };
@@ -762,12 +786,12 @@
             {
                 name: "兀恩雅護手", img: "gear/gloves/兀恩雅護手.png", set: "兀恩雅",
                 rarityStats: {
-                    white:  { def:4338, force: 750 },
-                    green:  { def:4448, force: 780 },
-                    blue:   { def:4558, force: 810 },
-                    purple: { def:4668, force: 840 },
-                    orange: { def:4778, force: 870 },
-                    red:    { def:4888, force: 900 },
+                    white:  { def:4338, force: 750, str: 225, agi: 113 },
+                    green:  { def:4448, force: 780, str: 225, agi: 113 },
+                    blue:   { def:4558, force: 810, str: 225, agi: 113 },
+                    purple: { def:4668, force: 840, str: 225, agi: 113 },
+                    orange: { def:4778, force: 870, str: 225, agi: 113 },
+                    red:    { def:4888, force: 900, str: 225, agi: 113 },
                 },
                 refine: { def:  { max: 479, step: { plus: 50, minus: 10} }, }
             },
@@ -782,12 +806,12 @@
             {
                 name: "兀恩雅靴子", img: "gear/boots/兀恩雅靴子.png", set: "兀恩雅",
                 rarityStats: {
-                    white:  { def:4338, force: 750 },
-                    green:  { def:4448, force: 780 },
-                    blue:   { def:4558, force: 810 },
-                    purple: { def:4668, force: 840 },
-                    orange: { def:4778, force: 870 },
-                    red:    { def:4888, force: 900 },
+                    white:  { def:4338, force: 750, str: 225, agi: 113 },
+                    green:  { def:4448, force: 780, str: 225, agi: 113 },
+                    blue:   { def:4558, force: 810, str: 225, agi: 113 },
+                    purple: { def:4668, force: 840, str: 225, agi: 113 },
+                    orange: { def:4778, force: 870, str: 225, agi: 113 },
+                    red:    { def:4888, force: 900, str: 225, agi: 113 },
                 },
                 refine: { def:  { max: 479, step: { plus: 50, minus: 10} }, }
             },
@@ -811,7 +835,7 @@
         { name: "天地交會之處",      require: { atk: 63120, crit: 337, bal: 190 } },
     ];
 
-    const labels = { atk:'攻擊力', def:'防禦力', crit:'暴擊率', bal:'平衡', force:'追加傷害', pen:'防禦力貫穿', speed:'攻擊速度'};
+    const labels = { atk:'攻擊力', def:'防禦力', crit:'暴擊率', bal:'平衡', force:'追加傷害', pen:'防禦力貫穿', speed:'攻擊速度', str:'力量', agi:'敏捷',};
 
     // ══════════════════════════════════════════
     //  裝備狀態：★ 新增 rarity 欄位
@@ -825,6 +849,9 @@
     let currentType = "";
     let currentSlotEl = null;
 
+
+    //定義防具部位 需要+209來對應技能加成
+    const armorSlots = ['helms', 'tunics', 'pants', 'gloves', 'foots'];
     // ══════════════════════════════════════════
     //  取得當前裝備的有效 stats（考慮稀有度）
     // ══════════════════════════════════════════
@@ -979,7 +1006,7 @@
         const card  = document.getElementById('baseStatCard');
         if (stats && Object.keys(stats).length > 0) {
             card.innerHTML = `<ul class="attr-list">
-                ${Object.keys(stats).map(k => `<li>${labels[k]} +${stats[k]}</li>`).join('')}
+                ${Object.keys(stats).map(k => `<li>${labels[k]} ${stats[k] > 0 ? '+' : ''}${stats[k]}</li>`).join('')}
             </ul>`;
         } else {
             card.innerHTML = '<span style="color:#555;font-size:12px">（無素質）</span>';
@@ -1005,8 +1032,8 @@
         }
         const data = enchantDb[name].stats;
         card.innerHTML = `<ul class="attr-list">
-            ${Object.keys(data).filter(k => data[k] > 0)
-                .map(k => `<li>${labels[k]} +${data[k]}</li>`).join('')}
+            ${Object.keys(data).filter(k => data[k] !== 0)
+                .map(k => `<li>${labels[k]} ${data[k] > 0 ? '+' : ''}${data[k]}</li>`).join('')}
         </ul>`;
         card.classList.add('has-content');
     }
@@ -1072,22 +1099,22 @@
     //  ★ 計算核心（改用 getItemStats 取稀有度素質）
     // ══════════════════════════════════════════
     function getCurrentTotal() {
-        let total = { atk: 0, def: 0, crit: 0, bal: 0, force: 0, pen: 0, speed: 0};
-        const str = parseInt(document.getElementById('base-str').value) || 0;
-        const agi = Math.min(parseInt(document.getElementById('base-agi').value) || 0, 2000);
+        let total = { atk: 0, def: 0, crit: 0, bal: 0, force: 0, pen: 0, speed: 0, str: 0, agi: 0};
+        const baseAgi = parseInt(document.getElementById('base-agi').value) || 0;
 
         total.atk   += parseInt(document.getElementById('base-atk').value)   || 0;
         total.def   += parseInt(document.getElementById('base-def').value)   || 0;
         total.crit  += parseInt(document.getElementById('base-crit').value)  || 0;
         total.bal   += parseInt(document.getElementById('base-bal').value)   || 0;
-        total.force += parseInt(document.getElementById('base-force').value) || 0;
-        total.speed += parseInt(document.getElementById('base-speed').value) || 0;
-        total.atk += str * 2.7;
-        total.def += agi * 0.5;
 
         Object.keys(equippedState).forEach(slot => {
             const state = equippedState[slot];
             if (!state.name) return;
+
+            // ★ 防禦專精：每件防具額外 +209 防禦
+            if (armorSlots.includes(slot)) {
+                total.def += 209;
+            }
 
             // ★ 用 getItemStats 取得（考慮稀有度後的）素質
             const stats = getItemStats(slot);
@@ -1123,6 +1150,14 @@
             const bonus = setDb[setName]?.[setCount[setName]];
             if (bonus) Object.keys(total).forEach(k => total[k] += bonus[k] || 0);
         });
+
+        // 力量換算攻擊力（無上限）
+        total.atk += total.str * 2.7;
+
+        // 敏捷換算防禦力（總敏捷封頂2000，只計算超出空裝敏捷的部分）
+        const totalAgi = Math.min(baseAgi + total.agi, 2000);
+        const extraAgi = totalAgi - baseAgi;
+        total.def += extraAgi * 0.5;
 
         return total;
     }
@@ -1193,7 +1228,7 @@
     // ══════════════════════════════════════════
     //  事件
     // ══════════════════════════════════════════
-    ['base-atk','base-speed','base-crit','base-bal','base-force','base-def','base-str','base-agi'].forEach(id => {
+    ['base-atk','base-speed','base-crit','base-bal','base-force','base-def','base-agi'].forEach(id => {
         document.getElementById(id).addEventListener('input', calculateTotal);
     });
 
