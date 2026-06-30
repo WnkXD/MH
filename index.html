@@ -428,7 +428,8 @@
         <div class="stat-item">平衡     <input class="base-input" id="base-bal" type="number" value="0"></div>
         <div class="stat-item">追加傷害 <input class="base-input" id="base-force" type="number" value="0"></div>
         <div class="stat-item">攻擊速度 <input class="base-input" id="base-speed" type="number" value="0"></div>
-        
+        <div class="stat-item">力量     <input class="base-input" id="base-str" type="number" value="0"></div>
+        <div class="stat-item">敏捷     <input class="base-input" id="base-agi" type="number" value="0"></div>
     </div>
 
     <h2>角色總能力值</h2>
@@ -1072,6 +1073,8 @@
     // ══════════════════════════════════════════
     function getCurrentTotal() {
         let total = { atk: 0, def: 0, crit: 0, bal: 0, force: 0, pen: 0, speed: 0};
+        const str = parseInt(document.getElementById('base-str').value) || 0;
+        const agi = Math.min(parseInt(document.getElementById('base-agi').value) || 0, 2000);
 
         total.atk   += parseInt(document.getElementById('base-atk').value)   || 0;
         total.def   += parseInt(document.getElementById('base-def').value)   || 0;
@@ -1079,6 +1082,8 @@
         total.bal   += parseInt(document.getElementById('base-bal').value)   || 0;
         total.force += parseInt(document.getElementById('base-force').value) || 0;
         total.speed += parseInt(document.getElementById('base-speed').value) || 0;
+        total.atk += str * 2.7;
+        total.def += agi * 0.5;
 
         Object.keys(equippedState).forEach(slot => {
             const state = equippedState[slot];
@@ -1188,7 +1193,7 @@
     // ══════════════════════════════════════════
     //  事件
     // ══════════════════════════════════════════
-    ['base-atk','base-speed','base-crit','base-bal','base-force','base-def','base-pen'].forEach(id => {
+    ['base-atk','base-speed','base-crit','base-bal','base-force','base-def','base-str','base-agi'].forEach(id => {
         document.getElementById(id).addEventListener('input', calculateTotal);
     });
 
