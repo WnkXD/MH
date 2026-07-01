@@ -420,13 +420,13 @@
 <body>
 
 <aside class="sidebar">
-    <h2>空裝素質</h2>
+    <h2>空裝素質　　　　<input type="checkbox" id="magic-mode" onchange="calculateTotal()">魔攻</h2>
     <div class="stat-box">
         <div class="stat-item">攻擊力   <input class="base-input" id="base-atk" type="number" value="0"></div>
         <div class="stat-item">防禦力   <input class="base-input" id="base-def" type="number" value="0"></div>
         <div class="stat-item">暴擊率   <input class="base-input" id="base-crit" type="number" value="0"></div>
-        <div class="stat-item">平衡     <input class="base-input" id="base-bal" type="number" value="0"></div>
         <div class="stat-item">敏捷     <input class="base-input" id="base-agi" type="number" value="0"></div>
+        <div class="stat-item">意志     <input class="base-input" id="base-wil" type="number" value="0"></div>
     </div>
 
     <h2>角色總能力值</h2>
@@ -529,6 +529,12 @@
                     <option value="purple">🟪 高級</option>
                     <option value="orange">🟧 稀有</option>
                     <option value="red">🟥 傳說</option>
+                </select>
+                <select id="starSelect" style="display:none" onchange="applyStar(this.value)">
+                    <option value="2">★★</option>
+                    <option value="3">★★★</option>
+                    <option value="4">★★★★</option>
+                    <option value="5">★★★★★</option>
                 </select>
                 <select id="upgradeSelect" style="display:none" onchange="applyUpgrade(this.value)">
                     <option value="20">+20</option>
@@ -669,12 +675,12 @@
             {
                 name: "埃柳頭盔", img: "gear/helms/埃柳頭盔.png", set: "埃柳",
                 rarityStats: {
-                    white:  { def:4888, force: 900 },
-                    green:  { def:5118, force: 945 },
-                    blue:   { def:5348, force: 990 },
-                    purple: { def:5578, force: 1035 },
-                    orange: { def:5808, force: 1080 },
-                    red:    { def:6158, force: 1125 },
+                    white:  { def:4888, force: 900, str: 180, agi: 90, int: 243, wil: 80 },
+                    green:  { def:5118, force: 945, str: 180, agi: 90, int: 243, wil: 80 },
+                    blue:   { def:5348, force: 990, str: 180, agi: 90, int: 243, wil: 80 },
+                    purple: { def:5578, force: 1035, str: 180, agi: 90, int: 243, wil: 80 },
+                    orange: { def:5808, force: 1080, str: 180, agi: 90, int: 243, wil: 80 },
+                    red:    { def:6158, force: 1125, str: 180, agi: 90, int: 243, wil: 80 },
                 },
                 refine: { def:  { max: 479, step: { plus: 50, minus: 10} }, }
             },
@@ -682,12 +688,12 @@
             {
                 name: "兀恩雅頭盔", img: "gear/helms/兀恩雅頭盔.png", set: "兀恩雅",
                 rarityStats: {
-                    white:  { def:4338, force: 750 },
-                    green:  { def:4448, force: 780 },
-                    blue:   { def:4558, force: 810 },
-                    purple: { def:4668, force: 840 },
-                    orange: { def:4778, force: 870 },
-                    red:    { def:4888, force: 900 },
+                    white:  { def:4338, force: 750, str: 180, agi: 90, int: 243, wil: 80 },
+                    green:  { def:4448, force: 780, str: 180, agi: 90, int: 243, wil: 80 },
+                    blue:   { def:4558, force: 810, str: 180, agi: 90, int: 243, wil: 80 },
+                    purple: { def:4668, force: 840, str: 180, agi: 90, int: 243, wil: 80 },
+                    orange: { def:4778, force: 870, str: 180, agi: 90, int: 243, wil: 80 },
+                    red:    { def:4888, force: 900, str: 180, agi: 90, int: 243, wil: 80 },
                 },
                 refine: { def:  { max: 479, step: { plus: 50, minus: 10} }, }
             },
@@ -701,9 +707,9 @@
             {
                 name: "埃柳武器", img: "gear/weapon/埃柳武器.png", set: "埃柳",
                 rarityStats: {
-                    white:  { atk: 37400, crit: 136, bal: 75, force: 4250, speed: 47},
-                    green:  { atk: 38650, crit: 137, bal: 76, force: 4400, speed: 47},
-                    blue:   { atk: 39900, crit: 138, bal: 77, force: 4550, speed: 47},
+                    white:  { atk: 37400, crit: 136, bal: 75, force: 4250, speed: 47, str: 110, agi: 60, int: 148, wil: 80},
+                    green:  { atk: 38650, crit: 137, bal: 76, force: 4400, speed: 47, str: 110, agi: 60, int: 148, wil: 80},
+                    blue:   { atk: 39900, crit: 138, bal: 77, force: 4550, speed: 47, str: 110, agi: 60, int: 148, wil: 80},
                     purple: { atk: 5 },
                     orange: { atk: 7 },
                     red:    { atk: 9 },
@@ -771,12 +777,12 @@
             {
                 name: "兀恩雅護脛", img: "gear/pants/兀恩雅護脛.png", set: "兀恩雅",
                 rarityStats: {
-                    white:  { def: 4293, force: 750 },
-                    green:  { def: 4403, force: 780 },
-                    blue:   { def: 4513, force: 810 },
-                    purple: { def: 4623, force: 840 },
-                    orange: { def: 4733, force: 870 },
-                    red:    { def: 4843, force: 900 },
+                    white:  { def: 4293, force: 750, str: 225, agi: 113, int: 304, wil: 100 },
+                    green:  { def: 4403, force: 780, str: 225, agi: 113, int: 304, wil: 100 },
+                    blue:   { def: 4513, force: 810, str: 225, agi: 113, int: 304, wil: 100 },
+                    purple: { def: 4623, force: 840, str: 225, agi: 113, int: 304, wil: 100 },
+                    orange: { def: 4733, force: 870, str: 225, agi: 113, int: 304, wil: 100 },
+                    red:    { def: 4843, force: 900, str: 225, agi: 113, int: 304, wil: 100 },
                 },
                 refine: { def:  { max: 567, step: { plus: 50, minus:10 } }, }
             },
@@ -786,12 +792,12 @@
             {
                 name: "兀恩雅護手", img: "gear/gloves/兀恩雅護手.png", set: "兀恩雅",
                 rarityStats: {
-                    white:  { def:4338, force: 750, str: 225, agi: 113 },
-                    green:  { def:4448, force: 780, str: 225, agi: 113 },
-                    blue:   { def:4558, force: 810, str: 225, agi: 113 },
-                    purple: { def:4668, force: 840, str: 225, agi: 113 },
-                    orange: { def:4778, force: 870, str: 225, agi: 113 },
-                    red:    { def:4888, force: 900, str: 225, agi: 113 },
+                    white:  { def:4338, force: 750, str: 225, agi: 113, wil: 100},
+                    green:  { def:4448, force: 780, str: 225, agi: 113, wil: 100 },
+                    blue:   { def:4558, force: 810, str: 225, agi: 113, wil: 100 },
+                    purple: { def:4668, force: 840, str: 225, agi: 113, wil: 100 },
+                    orange: { def:4778, force: 870, str: 225, agi: 113, wil: 100 },
+                    red:    { def:4888, force: 900, str: 225, agi: 113, wil: 100 },
                 },
                 refine: { def:  { max: 479, step: { plus: 50, minus: 10} }, }
             },
@@ -806,12 +812,12 @@
             {
                 name: "兀恩雅靴子", img: "gear/boots/兀恩雅靴子.png", set: "兀恩雅",
                 rarityStats: {
-                    white:  { def:4338, force: 750, str: 225, agi: 113 },
-                    green:  { def:4448, force: 780, str: 225, agi: 113 },
-                    blue:   { def:4558, force: 810, str: 225, agi: 113 },
-                    purple: { def:4668, force: 840, str: 225, agi: 113 },
-                    orange: { def:4778, force: 870, str: 225, agi: 113 },
-                    red:    { def:4888, force: 900, str: 225, agi: 113 },
+                    white:  { def:4338, force: 750, str: 225, agi: 113, wil: 100 },
+                    green:  { def:4448, force: 780, str: 225, agi: 113, wil: 100 },
+                    blue:   { def:4558, force: 810, str: 225, agi: 113, wil: 100 },
+                    purple: { def:4668, force: 840, str: 225, agi: 113, wil: 100 },
+                    orange: { def:4778, force: 870, str: 225, agi: 113, wil: 100 },
+                    red:    { def:4888, force: 900, str: 225, agi: 113, wil: 100 },
                 },
                 refine: { def:  { max: 479, step: { plus: 50, minus: 10} }, }
             },
@@ -822,8 +828,10 @@
     //  套裝資料庫（不變）
     // ══════════════════════════════════════════
     const setDb = {
-        "兀恩雅": { 1:{bal:2},2:{bal:4},3:{bal:5},4:{bal:6},5:{bal:8},6:{bal:10} },
-        "埃柳":   { 1:{def:120,bal:3},2:{def:240,bal:6},3:{def:485,bal:7},4:{def:615,bal:8},5:{def:615,bal:10},6:{def:680,bal:12} }
+        "兀恩雅": { 1:{ bal:2},2:{bal:4},3:{ def: 450, int: 131, str: 95, bal:5},4:{ def: 510, int: 158, str: 115, bal:6},
+                    5:{ def: 570, int: 185, str: 135, bal:8},6:{ def: 630, int: 209, str: 155, bal:10} },
+        "埃柳":   { 1:{def:120,str:23,bal:3},2:{def:240,str:46,bal:6},3:{def:485,str:95,bal:7},
+                    4:{def:615,str:115,bal:8},5:{def:615,str:135,bal:10},6:{def:680,str:155,bal:12} }
     };
 
     const raidDb = [
@@ -835,14 +843,15 @@
         { name: "天地交會之處",      require: { atk: 63120, crit: 337, bal: 190 } },
     ];
 
-    const labels = { atk:'攻擊力', def:'防禦力', crit:'暴擊率', bal:'平衡', force:'追加傷害', pen:'防禦力貫穿', speed:'攻擊速度', str:'力量', agi:'敏捷',};
+    const labels = { atk:'攻擊力', def:'防禦力', crit:'暴擊率', bal:'平衡', force:'追加傷害', 
+                     pen:'防禦力貫穿', speed:'攻擊速度', str:'力量', agi:'敏捷', wil:'意志', int:'智力'};
 
     // ══════════════════════════════════════════
     //  裝備狀態：★ 新增 rarity 欄位
     // ══════════════════════════════════════════
     let equippedState = {};
     Object.keys(itemDb).forEach(key => {
-        equippedState[key] = { name: "", top: null, end: null, stone: null, refine: {}, rarity: "", upgradeLevel: 0 };
+        equippedState[key] = { name: "", top: null, end: null, stone: null, refine: {}, rarity: "", upgradeLevel: 0, star: 2 };
         //                                                                              ↑ 預設稀有度
     });
 
@@ -852,6 +861,9 @@
 
     //定義防具部位 需要+209來對應技能加成
     const armorSlots = ['helms', 'tunics', 'pants', 'gloves', 'foots'];
+    //星數
+    const starMultiplier = { 2: 1.00, 3: 1.02, 4: 1.04, 5: 1.06 };
+    const statStarMultiplier = { 2: 1.00, 3: 1.15, 4: 1.20, 5: 1.25 }; //四大主屬性 (str, int, agi, wil)
     // ══════════════════════════════════════════
     //  取得當前裝備的有效 stats（考慮稀有度）
     // ══════════════════════════════════════════
@@ -862,8 +874,31 @@
         // ★ 有 rarityStats → 讀對應稀有度；否則讀 stats
         if (item.rarityStats) {
             const rarity = equippedState[slot].rarity || "";
-            return item.rarityStats[rarity] || {};
-        }
+            const base = { ...(item.rarityStats[rarity] || {}) };
+            const star = equippedState[slot].star ?? 2;
+            // 2. 定義四大主屬性
+            const mainStats = new Set(['str', 'int', 'agi', 'wil']);
+            // 不需要乘算的特殊屬性（維持原樣）
+            const skipKeys = new Set(['crit', 'bal', 'speed', 'pen', 'force']);
+            Object.keys(base).forEach(k => {
+                if (skipKeys.has(k)) {
+                    // 跳過不處理的屬性（暴擊、平衡、速度等）
+                    return; 
+                }
+        
+                if (mainStats.has(k)) {
+                    // 如果是四大主屬性，套用 1.15 / 1.20 / 1.25 倍率
+                    const statMult = statStarMultiplier[star] ?? 1;
+                    base[k] = Math.floor(base[k] * statMult);
+                } else {
+                    // 如果是攻擊力(atk)或防禦力(def)等其他需要乘算的屬性，套用原本的 1.02 / 1.04 / 1.06 倍率
+                    const generalMult = starMultiplier[star] ?? 1;
+                    base[k] = Math.floor(base[k] * generalMult);
+                }
+    });
+    
+    return base;
+}
 
         if (item.upgrade) {
             const level = equippedState[slot].upgradeLevel || 0;
@@ -921,6 +956,7 @@
         renderRefinePanel(currentType);
         calculateTotal();
         updateDetailTitle()
+        equippedState[currentType].star = 2;
     }
 
     function openEnchantDirect(el) {
@@ -941,6 +977,12 @@
     function updateSlotRarityBorder(el, rarity) {
         rarityList.forEach(r => el.classList.remove('rarity-' + r.key));
         if (rarity) el.classList.add('rarity-' + rarity);
+    }
+    //星數選單
+    function applyStar(star) {
+        equippedState[currentType].star = parseInt(star);
+        renderBaseStatCard();
+        calculateTotal();
     }
 
     // ══════════════════════════════════════════
@@ -965,17 +1007,22 @@
         const item = itemDb[currentType].find(i => i.name === name);
         const raritySelect = document.getElementById('raritySelect');
         const upgradeSelect  = document.getElementById('upgradeSelect');
+        const starSelect = document.getElementById('starSelect');
 
         if (item.rarityStats) {
             raritySelect.style.display = 'block';
+            starSelect.style.display = 'block';
             upgradeSelect.style.display  = 'none';
             raritySelect.value = equippedState[currentType].rarity || "white";
+            starSelect.value = equippedState[currentType].star ?? 2;
         } else if (item.upgrade) {
             upgradeSelect.style.display = 'block';
             raritySelect.style.display = 'none';
+            starSelect.style.display = 'none';
             upgradeSelect.value = equippedState[currentType].upgradeLevel || 0;
         } else {
             raritySelect.style.display = 'none';
+            starSelect.style.display = 'none';
             upgradeSelect.style.display  = 'none';
         }
 
@@ -1099,13 +1146,13 @@
     //  ★ 計算核心（改用 getItemStats 取稀有度素質）
     // ══════════════════════════════════════════
     function getCurrentTotal() {
-        let total = { atk: 0, def: 0, crit: 0, bal: 0, force: 0, pen: 0, speed: 0, str: 0, agi: 0};
+        let total = { atk: 0, def: 0, crit: 0, bal: 0, force: 0, pen: 0, speed: 0, str: 0, agi: 0, wil: 0, int: 0};
         const baseAgi = parseInt(document.getElementById('base-agi').value) || 0;
+        const baseWil = parseInt(document.getElementById('base-wil').value) || 0;
 
         total.atk   += parseInt(document.getElementById('base-atk').value)   || 0;
         total.def   += parseInt(document.getElementById('base-def').value)   || 0;
         total.crit  += parseInt(document.getElementById('base-crit').value)  || 0;
-        total.bal   += parseInt(document.getElementById('base-bal').value)   || 0;
 
         Object.keys(equippedState).forEach(slot => {
             const state = equippedState[slot];
@@ -1151,13 +1198,22 @@
             if (bonus) Object.keys(total).forEach(k => total[k] += bonus[k] || 0);
         });
 
-        // 力量換算攻擊力（無上限）
-        total.atk += total.str * 2.7;
+        // 力量換算攻擊力（無上限
+        const isMagic = document.getElementById('magic-mode').checked;
+        if (isMagic) {
+            total.atk += total.int * 2;
+        } else {
+            total.atk += total.str * 2.7;
+        }
 
         // 敏捷換算防禦力（總敏捷封頂2000，只計算超出空裝敏捷的部分）
         const totalAgi = Math.min(baseAgi + total.agi, 2000);
         const extraAgi = totalAgi - baseAgi;
         total.def += extraAgi * 0.5;
+
+        const totalWil = Math.min(baseWil + total.wil, 2000);
+        const extraWil = totalWil - baseWil;
+        total.crit += extraWil * 0.0075;
 
         return total;
     }
@@ -1228,7 +1284,7 @@
     // ══════════════════════════════════════════
     //  事件
     // ══════════════════════════════════════════
-    ['base-atk','base-speed','base-crit','base-bal','base-force','base-def','base-agi'].forEach(id => {
+    ['base-atk','base-crit','base-force','base-def','base-agi','base-wil'].forEach(id => {
         document.getElementById(id).addEventListener('input', calculateTotal);
     });
 
