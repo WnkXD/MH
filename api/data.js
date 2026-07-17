@@ -238,6 +238,9 @@ export default function handler(req, res) {
 
         artifact: [
             { name: "注視者的完整技能道具", img: "/accessory/artifact/13-final.png", stats: { atk: 1000, bal: 5 } },
+            { name: "注視者的閃亮技能道具", img: "/accessory/artifact/13-purple.png",stats: { atk: 1000, bal: 3 } },
+            { name: "注視者的技能道具"    , img: "/accessory/artifact/13-blue.png",  stats: { atk: 500 , bal: 3 } },
+            { name: "注視者的生鏽技能道具", img: "/accessory/artifact/13-green.png", stats: { atk: 500 , bal: 1 } },
         ],
         },
 
