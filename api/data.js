@@ -196,8 +196,22 @@ export default function handler(req, res) {
         ],
 
         belt: [
-            { name: "詛咒腰帶", img: "/accessory/belt/2.png", stats: { bal: 12, str: 145, agi: 95, int: 193, wil: 105 } },
-            { name: "鬥爭腰帶", img: "/accessory/belt/1.png", stats: { bal: 8,  str: 145, agi: 95, int: 193, wil: 105 } },
+            { name: "星光腰帶", img: "/accessory/belt/3.png", stats: { bal: 16, str: 145, agi: 95, int: 193, wil: 105 },
+              upgrade: { 0:{},
+                         1 :{atk:16,pen: 7},2:{atk:32, pen:13},3:{atk:48, pen:20},4:{atk:64, pen:26},5 :{atk:80, pen:33},
+                         6 :{atk:96,pen:39},7:{atk:112,pen:46},8:{atk:128,pen:52},9:{atk:144,pen:59},10:{atk:160,pen:65},
+                         11:{atk:176,pen:72} ,12:{atk:192,pen:78 },13:{atk:208,pen:85} ,14:{atk:224,pen:91 },15:{atk:240,pen:98 }, 
+                         16:{atk:256,pen:104},17:{atk:272,pen:111},18:{atk:288,pen:117},19:{atk:304,pen:124},20:{atk:320,pen:130},
+                        } },
+            { name: "詛咒腰帶", img: "/accessory/belt/2.png", stats: { bal: 12, str: 145, agi: 95, int: 193, wil: 105 },
+              upgrade: { 0 :{}, 
+                         1 :{atk:15, pen: 6}, 2:{atk:30,pen: 11}, 3:{atk:45,pen: 17}, 4:{atk:60,pen:22},   5:{atk:75, pen:28},
+                         6 :{atk:90, pen:33}, 7:{atk:105,pen:39}, 8:{atk:120,pen:44}, 9:{atk:135,pen:50}, 10:{atk:150,pen:55},
+                         11:{atk:165,pen:61},12:{atk:180,pen:66},13:{atk:195,pen:72},14:{atk:210,pen:77}, 15:{atk:225,pen:83}, 
+                         16:{atk:240,pen:88},17:{atk:255,pen:94},18:{atk:270,pen:99},19:{atk:285,pen:105},20:{atk:300,pen:110},
+                        } },
+            { name: "鬥爭腰帶", img: "/accessory/belt/1.png", stats: { bal: 8,  str: 145, agi: 95, int: 193, wil: 105 },
+              upgrade: { 0:{},20:{atk:280,pen:90} } },
         ],
 
         feet: [
