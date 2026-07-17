@@ -34,7 +34,7 @@ export default function handler(req, res) {
                          16:{atk:256,pen:104},17:{atk:272,pen:111},18:{atk:288,pen:117},19:{atk:304,pen:124},20:{atk:320,pen:130},
                         }
               },
-            { name: "太陽的悲願", img: "/accessory/earring/2.png", stats: { crit: 11, str: 125, agi:50, int: 167, wil: 58 } ,
+            { name: "太陽的悲願", img: "/accessory/earring/2.png", stats: { crit: 11, str: 125, agi: 50, int: 167, wil: 58 } ,
               upgrade: { 0 :{}, 
                          1 :{atk:15, pen: 6}, 2:{atk:30,pen: 11}, 3:{atk:45,pen: 17}, 4:{atk:60,pen:22},   5:{atk:75, pen:28},
                          6 :{atk:90, pen:33}, 7:{atk:105,pen:39}, 8:{atk:120,pen:44}, 9:{atk:135,pen:50}, 10:{atk:150,pen:55},
@@ -42,7 +42,8 @@ export default function handler(req, res) {
                          16:{atk:240,pen:88},17:{atk:255,pen:94},18:{atk:270,pen:99},19:{atk:285,pen:105},20:{atk:300,pen:110},
                         },
               },
-            { name: "聖所的耳環", img: "/accessory/earring/1.png", stats: { crit: 7 } },
+            { name: "聖所的耳環", img: "/accessory/earring/1.png", stats: { crit: 7 , str: 125, agi: 50, int: 167, wil: 58 },
+              upgrade: { 0 :{}, 18:{atk:252,pen:81},19:{atk:266,pen:85}, 20:{atk:280,pen:90} }, },
         ],
 
         head: [

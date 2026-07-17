@@ -592,12 +592,6 @@
                                 <option value="orange">🟧 稀有</option>
                                 <option value="red">🟥 傳說</option>
                             </select>
-                            <select id="starSelect" style="display:none; flex:1" onchange="applyStar(this.value)">
-                                <option value="2">★★</option>
-                                <option value="3">★★★</option>
-                                <option value="4">★★★★</option>
-                                <option value="5">★★★★★</option>
-                            </select>
                             <select id="upgradeSelect" style="display:none" onchange="applyUpgrade(this.value)">
                                 <option value="20">+20</option>
                                 <option value="19">+19</option>
@@ -619,6 +613,12 @@
                                 <option value="3">+3</option>
                                 <option value="2">+2</option>
                                 <option value="1">+1</option>
+                            </select>
+                            <select id="starSelect" style="display:none; flex:1" onchange="applyStar(this.value)">
+                                <option value="2">★★</option>
+                                <option value="3">★★★</option>
+                                <option value="4">★★★★</option>
+                                <option value="5">★★★★★</option>
                             </select>
                         </div>
                     </div>
@@ -740,43 +740,44 @@
         const item = itemDb[slot]?.find(i => i.name === equippedState[slot].name);
         if (!item) return null;
 
-        // ★ 有 rarityStats → 讀對應稀有度；否則讀 stats
+        // 1. 決定「本體」基礎屬性 (有 rarityStats 讀 rarityStats；否則讀一般 stats)
+        let base = {};
         if (item.rarityStats) {
             const rarity = equippedState[slot].rarity || "";
-            const base = { ...(item.rarityStats[rarity] || {}) };
-            const star = equippedState[slot].star ?? 2;
-            // 2. 定義四大主屬性
-            const mainStats = new Set(['str', 'int', 'agi', 'wil']);
-            // 不需要乘算的特殊屬性（維持原樣）
-            const skipKeys = new Set(['crit', 'bal', 'speed', 'pen', 'force']);
-            Object.keys(base).forEach(k => {
-                if (skipKeys.has(k)) {
-                    // 跳過不處理的屬性（暴擊、平衡、速度等）
-                    return; 
-                }
-        
-                if (mainStats.has(k)) {
-                    // 如果是四大主屬性，套用 1.15 / 1.20 / 1.25 倍率
-                    const statMult = statStarMultiplier[star] ?? 1;
-                    base[k] = Math.floor(base[k] * statMult);
-                } else {
-                    // 如果是攻擊力(atk)或防禦力(def)等其他需要乘算的屬性，套用原本的 1.02 / 1.04 / 1.06 倍率
-                    const generalMult = starMultiplier[star] ?? 1;
-                    base[k] = Math.floor(base[k] * generalMult);
-                }
-    });
-    
-    return base;
-}
-
-        if (item.upgrade) {
-            const level = equippedState[slot].upgradeLevel || 0;
-            const base = { ...(item.stats || {}) };
-            const bonus = item.upgrade[level] || {};
-            Object.keys(bonus).forEach(k => base[k] = (base[k] || 0) + bonus[k]);
-            return base;
+            base = { ...(item.rarityStats[rarity] || {}) };
+        } else {
+            base = { ...(item.stats || {}) };
         }
-        return item.stats || {};
+
+        // 2. 本體屬性套用「星級倍率乘算」（強化前先乘算！）
+        const star = equippedState[slot].star ?? 2;
+        const mainStats = new Set(['str', 'int', 'agi', 'wil']);
+        const skipKeys = new Set(['crit', 'bal', 'speed', 'pen', 'force']);
+
+        Object.keys(base).forEach(k => {
+            if (skipKeys.has(k)) return; // 排除 crit, speed 等不乘算的屬性
+
+            if (mainStats.has(k)) {
+                // 四大主屬性 (str, int, agi, wil) 乘上主屬性倍率
+                const statMult = statStarMultiplier[star] ?? 1;
+                base[k] = Math.floor(base[k] * statMult + 0.001);
+            } else {
+                // 本體自帶的其他屬性 (如 atk, def 等) 乘上一般倍率
+                const generalMult = starMultiplier[star] ?? 1;
+                base[k] = Math.floor(base[k] * generalMult);
+            }
+        });
+
+        // 3. 最後才加上「upgrade 強化帶來的額外數值」（直接疊加，不參與前面的乘算）
+        if (item.upgrade) {
+            const level = equippedState[slot].upgradeSelect || equippedState[slot].upgradeLevel || 0;
+            const bonus = item.upgrade[level] || {};
+            Object.keys(bonus).forEach(k => {
+                base[k] = (base[k] || 0) + bonus[k];
+            });
+        }
+
+        return base;
     }
 
     // ══════════════════════════════════════════
@@ -973,8 +974,9 @@
         } else if (item.upgrade) {
             upgradeSelect.style.display = 'block';
             raritySelect.style.display = 'none';
-            starSelect.style.display = 'none';
+            starSelect.style.display = 'block';
             upgradeSelect.value = equippedState[currentType].upgradeLevel || 0;
+            starSelect.value = equippedState[currentType].star ?? 2;
         } else {
             raritySelect.style.display = 'none';
             starSelect.style.display = 'none';
