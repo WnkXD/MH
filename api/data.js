@@ -47,7 +47,7 @@ export default function handler(req, res) {
 
         head: [
             {
-                name: "埃柳頭盔", img: "/gear/head/head1.png", set: "埃柳",
+                name: "埃柳頭盔", img: "/gear/head/2.png", set: "埃柳",
                 rarityStats: {
                     white:  { force: 900,  def:4888, str: 180, agi: 90, int: 243, wil: 80 },
                     green:  { force: 945,  def:5118, str: 180, agi: 90, int: 243, wil: 80 },
@@ -60,7 +60,7 @@ export default function handler(req, res) {
             },
 
             {
-                name: "兀恩雅頭盔", img: "/gear/head/兀恩雅頭盔.png", set: "兀恩雅",
+                name: "兀恩雅頭盔", img: "/gear/head/1.png", set: "兀恩雅",
                 rarityStats: {
                     white:  { force: 750, def:4338, str: 180, agi: 90, int: 243, wil: 80 },
                     green:  { force: 780, def:4448, str: 180, agi: 90, int: 243, wil: 80 },
