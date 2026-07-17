@@ -286,7 +286,7 @@
             display: none;
             flex-wrap: wrap;
             gap: 8px;
-            max-width: 250px;  /*彈出的裝備排列數量寬度*/
+            max-width: 310px;  /*彈出的裝備排列數量寬度*/
         }
 
         .enchant-trigger {
@@ -311,8 +311,8 @@
         }
 
         .tooltip-option {
-            width: 58px;
-            height: 58px;
+            width: 78px;
+            height: 78px;
             background: #333;
             border: 1px solid #444;
             border-radius: 6px;
@@ -812,12 +812,6 @@
 
         const items = itemDb[currentType] || [];
 
-        // 新增：先顯示「無」選項（移除裝備）
-        const emptyOption = `<div style="width:58px;height:58px;background:#333;border:1px solid #444;border-radius:6px;
-                                  display:flex;align-items:center;justify-content:center;cursor:pointer;color:#ff4d4d;font-size:20px;" 
-                                  title="移除裝備" 
-                                  onclick="removeItem()">X</div>`;
-    
         const itemOptions = items.map((item, i) =>
             `<img src="${item.img}" class="tooltip-option" title="${item.name}" onclick="selectItem(${i})">`
         ).join('');
