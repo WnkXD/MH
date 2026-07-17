@@ -286,7 +286,7 @@
             display: none;
             flex-wrap: wrap;
             gap: 8px;
-            max-width: 160px;
+            max-width: 250px;  /*彈出的裝備排列數量寬度*/
         }
 
         .enchant-trigger {
@@ -822,7 +822,23 @@
             `<img src="${item.img}" class="tooltip-option" title="${item.name}" onclick="selectItem(${i})">`
         ).join('');
 
-        tooltip.innerHTML = emptyOption + itemOptions;
+        tooltip.innerHTML = `
+            <!-- 最外層容器：設定為 flex 排版，並允許折行 (wrap)，同時加入 gap 調整間距 -->
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; position: relative; padding-right: 32px;">
+        
+                <!-- 1. ✕ 按鈕：維持絕對定位貼在右上角，不影響裝備排版 -->
+                <div style="position: absolute; top: 0; right: 0; z-index: 10;">
+                    <div style="width:24px; height:24px; background:#3a1a1a; border:1px solid #ff4d4d; border-radius:4px;
+                                display:flex; align-items:center; justify-content:center; cursor:pointer;
+                                color:#ff4d4d; font-size:14px;" 
+                         title="移除裝備" onclick="removeItem()">✕</div>
+                </div>
+        
+                <!-- 2. 裝備列表 -->
+                ${itemOptions}
+        
+            </div>
+        `;
 
         const rect = el.getBoundingClientRect();
         tooltip.style.left = (rect.right + 10) + 'px';
