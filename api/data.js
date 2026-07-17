@@ -74,15 +74,15 @@ export default function handler(req, res) {
         ],
 
         necklace: [
-            { name: "璀璨的貓咪項鍊", img: "/accessory/necklace/璀璨的貓咪項鍊.png",
-              stats: { bal: 2, crit: 2, def: 50, str: 10, agi: 16, int: 13, wil: 10} },
-            { name: "黑貓項鍊", img: "/accessory/necklace/黑貓項鍊.png",
+            { name: "黑貓項鍊",      img: "/accessory/necklace/2.png",
               stats: { bal: 4, crit: 4, def: 50, str: 10, agi: 16, int: 13, wil: 10} },
+            { name: "璀璨的貓咪項鍊", img: "/accessory/necklace/1.png",
+              stats: { bal: 2, crit: 2, def: 50, str: 10, agi: 16, int: 13, wil: 10} },
         ],
 
         weapon: [
             {
-                name: "埃柳武器", img: "/gear/weapon/埃柳武器.png", set: "埃柳",
+                name: "埃柳武器", img: "/gear/weapon/2.png", set: "埃柳",
                 rarityStats: {
                     white:  { atk: 37400, bal: 75, crit: 136, force: 4250, speed: 47, str: 110, agi: 60, int: 148, wil: 80},
                     green:  { atk: 38650, bal: 76, crit: 137, force: 4400, speed: 47, str: 110, agi: 60, int: 148, wil: 80},
@@ -99,7 +99,7 @@ export default function handler(req, res) {
             },
 
             {
-                name: "兀恩雅武器", img: "/gear/weapon/兀恩雅武器.png", set: "兀恩雅",
+                name: "兀恩雅武器", img: "/gear/weapon/1.png", set: "兀恩雅",
                 // ★ 改成 rarityStats
                 rarityStats: {
                     white:  { atk: 34900, bal: 67, crit: 128, speed: 47, force: 3750, str: 110, agi: 60, int: 148, wil: 80},
@@ -119,7 +119,7 @@ export default function handler(req, res) {
 
         chest: [
             {
-                name: "埃柳鏈甲", img: "/gear/chest/埃柳鏈甲.png", set: "埃柳",
+                name: "埃柳鏈甲", img: "/gear/chest/2.png", set: "埃柳",
                 rarityStats: {
                     white:  { force: 900,  def: 5058, str: 225, agi: 113, int: 304, wil: 100 },
                     green:  { force: 945,  def: 5339, str: 225, agi: 113, int: 304, wil: 100 },
@@ -132,7 +132,7 @@ export default function handler(req, res) {
             },
 
             {
-                name: "兀恩雅鏈甲", img: "/gear/chest/兀恩雅鏈甲.png", set: "兀恩雅",
+                name: "兀恩雅鏈甲", img: "/gear/chest/1.png", set: "兀恩雅",
                 rarityStats: {
                     white:  { force: 750, def: 4508, str: 225, agi: 113, int: 304, wil: 100 },
                     green:  { force: 780, def: 4618, str: 225, agi: 113, int: 304, wil: 100 },
@@ -146,15 +146,15 @@ export default function handler(req, res) {
         ],
 
         totem: [
-            { name: "埃柳之書",   img: "/accessory/totem/埃柳之書.png",
+            { name: "埃柳之書",   img: "/accessory/totem/2.png",
               stats: { atk: 1410, crit: 10, speed: 3, def: 3090, str: 180, agi: 90, int: 243, wil: 80 }, },
-            { name: "兀恩雅之書", img: "/accessory/totem/兀恩雅之書.png",
+            { name: "兀恩雅之書", img: "/accessory/totem/1.png",
               stats: { atk: 1410, crit: 10, speed: 3, def: 3590, str: 180, agi: 90, int: 243, wil: 80 }, },
         ],
 
         leg: [
             {
-                name: "埃柳護脛", img: "/gear/leg/埃柳護脛.png", set: "埃柳",
+                name: "埃柳護脛", img: "/gear/leg/2.png", set: "埃柳",
                 rarityStats: {
                     white:  { force: 900,  def: 4843, str: 225, agi: 113, int: 304, wil: 100 },
                     green:  { force: 945,  def: 5093, str: 225, agi: 113, int: 304, wil: 100 },
@@ -167,7 +167,7 @@ export default function handler(req, res) {
             },
 
             {
-                name: "兀恩雅護脛", img: "/gear/leg/兀恩雅護脛.png", set: "兀恩雅",
+                name: "兀恩雅護脛", img: "/gear/leg/1.png", set: "兀恩雅",
                 rarityStats: {
                     white:  { force: 750, def: 4293, str: 225, agi: 113, int: 304, wil: 100 },
                     green:  { force: 780, def: 4403, str: 225, agi: 113, int: 304, wil: 100 },
@@ -182,7 +182,7 @@ export default function handler(req, res) {
 
         hand: [
             {
-                name: "兀恩雅護手", img: "/gear/hand/兀恩雅護手.png", set: "兀恩雅",
+                name: "兀恩雅護手", img: "/gear/hand/1.png", set: "兀恩雅",
                 rarityStats: {
                     white:  { force: 750, def:4338, str: 225, agi: 113, int: 304, wil: 100 },
                     green:  { force: 780, def:4448, str: 225, agi: 113, int: 304, wil: 100 },
@@ -196,13 +196,13 @@ export default function handler(req, res) {
         ],
 
         belt: [
-            { name: "詛咒腰帶", img: "/accessory/belt/詛咒腰帶.png", stats: { bal: 12, str: 145, agi: 95, int: 193, wil: 105 } },
-            { name: "鬥爭腰帶", img: "/accessory/belt/鬥爭腰帶.png", stats: { bal: 8,  str: 145, agi: 95, int: 193, wil: 105 } },
+            { name: "詛咒腰帶", img: "/accessory/belt/2.png", stats: { bal: 12, str: 145, agi: 95, int: 193, wil: 105 } },
+            { name: "鬥爭腰帶", img: "/accessory/belt/1.png", stats: { bal: 8,  str: 145, agi: 95, int: 193, wil: 105 } },
         ],
 
         feet: [
             {
-                name: "兀恩雅靴子", img: "/gear/feet/兀恩雅靴子.png", set: "兀恩雅",
+                name: "兀恩雅靴子", img: "/gear/feet/1.png", set: "兀恩雅",
                 rarityStats: {
                     white:  { force: 750, def:4338, str: 225, agi: 113, int: 304, wil: 100 },
                     green:  { force: 780, def:4448, str: 225, agi: 113, int: 304, wil: 100 },
@@ -216,28 +216,28 @@ export default function handler(req, res) {
         ],
 
         jewelry: [
-            { name: "灰燼暮光胸針", img: "/accessory/jewelry/灰燼暮光胸針.png",
+            { name: "灰燼暮光胸針", img: "/accessory/jewelry/2.png",
                 stats: { crit: 4, speed: 3, def: 200, str:50, agi: 50, int: 67, wil: 50 } },
-            { name: "純白之羽胸針", img: "/accessory/jewelry/純白之羽胸針.png", 
+            { name: "純白之羽胸針", img: "/accessory/jewelry/1.png", 
                 stats: { crit: 2, speed: 2, def: 100, str:50, agi: 50, int: 67, wil: 50 } },
         ],
 
         ring: [
-            { name: "暗之暈", img: "/accessory/ring/暗之暈.png", stats: { bal: 5,  crit: 6, str: 140, agi: 70, int: 180, wil: 80 },
+            { name: "暗之暈", img: "/accessory/ring/115-1.png", stats: { bal: 5,  crit: 6, str: 140, agi: 70, int: 180, wil: 80 },
             upgrade: { 0:{}, 20:{atk:280,pen:90} } },
-            { name: "暗之影", img: "/accessory/ring/暗之影.png", stats: { bal: 5,  crit: 6, str: 140, agi: 70, int: 180, wil: 80 },
+            { name: "暗之影", img: "/accessory/ring/115-2.png", stats: { bal: 5,  crit: 6, str: 140, agi: 70, int: 180, wil: 80 },
             upgrade: { 0:{}, 20:{atk:280,pen:90} } },
         ],
 
         ring2: [
-            { name: "暗之暈", img: "/accessory/ring/暗之暈.png", stats: { bal: 5,  crit: 6, str: 140, agi: 70, int: 180, wil: 80 },
+            { name: "暗之暈", img: "/accessory/ring/115-1.png", stats: { bal: 5,  crit: 6, str: 140, agi: 70, int: 180, wil: 80 },
             upgrade: { 0:{}, 20:{atk:280,pen:90} } },
-            { name: "暗之影", img: "/accessory/ring/暗之影.png", stats: { bal: 5,  crit: 6, str: 140, agi: 70, int: 180, wil: 80 },
+            { name: "暗之影", img: "/accessory/ring/115-2.png", stats: { bal: 5,  crit: 6, str: 140, agi: 70, int: 180, wil: 80 },
             upgrade: { 0:{}, 20:{atk:280,pen:90} } },
         ],
 
         artifact: [
-            { name: "注視者的完整技能道具", img: "/accessory/artifact/注視者的完整的神祕貓雕像.png", stats: { atk: 1000, bal: 5 } },
+            { name: "注視者的完整技能道具", img: "/accessory/artifact/13-final.png", stats: { atk: 1000, bal: 5 } },
         ],
         },
 
