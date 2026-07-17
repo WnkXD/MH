@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>裝備模擬器</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            display: flex;
+            height: 100vh;
+            font-family: '微軟正黑體', 'Noto Sans TC', sans-serif;
+            background-color: #1a1a1a;
+            color: white;
+            overflow: hidden;
+        }
+
+        /* ── Sidebar ── */
+        .sidebar {
+            width: 220px;
+            background-color: #202020;
+            padding: 20px;
+            border-right: 1px solid #2e2e2e;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .sidebar h2 { font-size: 15px; color: #ccc; font-weight: 600; }
+        .stat-box {
+            background: #161616;
+            padding: 14px;
+            border-radius: 10px;
+            border: 1px solid #2e2e2e;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .stat-item { display: flex; justify-content: space-between; font-size: 13px; color: #888; }
+        .stat-value { color: #f0f0f0; font-weight: bold; }
+
+        /* ── Main ── */
+        .main-content {
+            flex-grow: 1;
+            padding: 30px;
+            display: flex;
+            gap: 24px;
+            overflow: hidden;
+        }
+
+        /* ── Grid ── */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(6, 100px);
+            gap: 12px;
+            flex-shrink: 0;
+            align-content: start;
+        }
+        .grid-item {
+            background-color: #222;
+            border: 2px solid #333;
+            border-radius: 10px;
+            cursor: pointer;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: border-color 0.15s, background 0.15s;
+        }
+        .grid-item:hover { border-color: #0060df; background-color: #272727; }
+        .grid-item img { width: 95%; height: 95%; object-fit: contain; display: none; }
+        .slot-label { position: absolute; bottom: 5px; font-size: 10px; color: #c9c9c9; }
+
+        /* ── 稀有度邊框顏色 ── */
+        /*.grid-item.rarity-white  { border-color: #aaaaaa; }*/
+        .grid-item.rarity-green  { border-color: #4caf50; }
+        .grid-item.rarity-blue   { border-color: #2196f3; }
+        .grid-item.rarity-purple { border-color: #9c27b0; }
+        .grid-item.rarity-orange { border-color: #ff9800; }
+        .grid-item.rarity-red    { border-color: #f44336; }
+
+        /* ── Detail Panel ── */
+        .detail-panel {
+            width: 320px;
+            flex-shrink: 0;
+            background: #1c1c1c;
+            border: 1px solid #2e2e2e;
+            border-radius: 14px;
+            padding: 10px;
+            display: flex;   /* 修正：原本是 display: 1，這裡改成 flex */
+            flex-direction: column;
+            gap: 8px;
+            height: calc(100vh - 60px);
+        }
+
+        .detail-panel h2 {
+            font-size: 16px;
+            color: #eee;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #2e2e2e;
+            flex-shrink: 0;
+            margin-bottom: 8px;
+        }
+
+        .enchant-sections {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-height: 0;
+        }
+
+        .enchant-part .enchant-row {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: 6px 10px;
+            padding: 10px 12px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid #2a2a2a;
+            border-radius: 10px;
+            flex-shrink: 0;
+            flex: 1;           /* ← 附魔框撐滿空間 */
+            min-height: 0;     /* ← 同上 */
+        }
+        .enchant-part .scroll-card {
+            flex: 1;
+            min-height: 0;
+        }
+
+        .enchant-part {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-height: 0;
+        }
+
+        .enchant-part:nth-child(1) { flex-basis: 20%; }  /* 裝備本身 */
+        .enchant-part:nth-child(2) { flex-basis: 15%; }  /* 字首 */
+        .enchant-part:nth-child(3) { flex-basis: 15%; }  /* 字尾 */
+        .enchant-part:nth-child(4) { flex-basis: 5%; }  /* 精靈石 */
+
+        /*附魔資訊黑底框參數*/
+        .enchant-row {
+            flex: 1;
+            min-height: 0;
+            display: grid;
+            grid-template-columns: 120px 1fr;  /* 左欄：標籤+選單，右欄：數值卡片 */
+            grid-template-rows: auto;
+            gap: 6px 10px;
+            padding: 5px 12px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid #2a2a2a;
+            border-radius: 10px;
+        }
+
+        .enchant-label {
+            font-size: 16px;
+            color: #bdbdbd;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            flex-shrink: 0;
+        }
+
+        .enchant-left {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-self: stretch;
+        }
+        
+        select {
+            width: 100%;
+            background: #2a2a2a;
+            color: #ddd;
+            border: 1px solid #3a3a3a;
+            padding: 6px 8px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            cursor: pointer;
+            outline: none;
+            flex-shrink: 0;
+            align-self: flex-start;
+        }
+        select:focus { border-color: #555; }
+
+        /* ── 稀有度選單顏色 ── */
+        select#raritySelect option[value="white"]  { color: #aaaaaa; }
+        select#raritySelect option[value="green"]  { color: #4caf50; }
+        select#raritySelect option[value="blue"]   { color: #2196f3; }
+        select#raritySelect option[value="purple"] { color: #9c27b0; }
+        select#raritySelect option[value="orange"] { color: #ff9800; }
+        select#raritySelect option[value="red"]    { color: #f44336; }
+
+        .rarity-badge {
+            display: inline-block;
+            font-size: 11px;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-left: 6px;
+            font-weight: bold;
+        }
+        .rarity-badge.white  { background: #444; color: #aaa; }
+        .rarity-badge.green  { background: #1a3a1a; color: #4caf50; }
+        .rarity-badge.blue   { background: #0d2035; color: #2196f3; }
+        .rarity-badge.purple { background: #2a1035; color: #ce93d8; }
+        .rarity-badge.orange { background: #3a2000; color: #ff9800; }
+        .rarity-badge.red    { background: #3a0a0a; color: #f44336; }
+
+        .scroll-card-wrap {
+            display: grid;
+            grid-template-rows: 0fr;
+            transition: grid-template-rows 0.5s ease-out;
+            overflow: hidden;
+        }
+
+        .scroll-card.has-content {
+            padding: 8px 10px;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /*附魔資訊黑底框動畫參數*/
+        .scroll-card {
+            align-self: stretch;
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            background: rgba(0,0,0,0.2);
+            border: 1px solid #2e2e2e;
+            border-radius: 6px;
+            padding: 8px 10px;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.3s ease, transform 0.3s ease, padding 0.1s ease;
+        }
+        .scroll-card.has-content { opacity: 1; }
+
+        .base-row .scroll-card {
+            background: transparent;
+            border: none !important;
+            flex: 1;
+            opacity: 1;
+        }
+
+        .scroll-title {
+            color: #ffc107;
+            font-size: 12px;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .attr-list {
+            list-style: none;
+            font-size: 14px;
+            color: #e9cd68;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .attr-list li::before { content: "• "; color: #555; }
+
+        .base-input {
+            width: 70px;
+            background: #2a2a2a;
+            color: #fff;
+            border: 1px solid #3a3a3a;
+            border-radius: 4px;
+            padding: 3px 6px;
+            font-size: 13px;
+            text-align: right;
+        }
+        .base-input:focus { outline: none; border-color: #555; }
+
+        /* ── Tooltip ── */
+        #itemTooltip {
+            position: fixed;
+            background: #252525;
+            border: 1px solid #3a3a3a;
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+            z-index: 999;
+            display: none;
+            flex-wrap: wrap;
+            gap: 8px;
+            max-width: 160px;
+        }
+
+        .enchant-trigger {
+            position: absolute;
+            right: 4px;
+            top: 4px;
+            font-size: 10px;
+            color: #e4e280;
+            padding: 2px 4px;
+            border-radius: 4px;
+            opacity: 0;
+            transition: opacity 0.15s;
+        }
+        .grid-item:hover .enchant-trigger {
+            opacity: 1;
+        }
+
+        .base-input::-webkit-outer-spin-button,
+        .base-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .tooltip-option {
+            width: 58px;
+            height: 58px;
+            background: #333;
+            border: 1px solid #444;
+            border-radius: 6px;
+            cursor: pointer;
+            object-fit: contain;
+            padding: 4px;
+            transition: border-color 0.15s, transform 0.15s;
+        }
+        .tooltip-option:hover { border-color: #0060df; transform: scale(1.08); }
+
+        /* ── Raid Panel ── */
+        .raid-panel {
+            width: 500px;
+            flex-shrink: 0;
+            background: #1c1c1c;
+            border: 1px solid #2e2e2e;
+            border-radius: 14px;
+            padding: 16px;
+            display: flex;
+            flex-direction: row;
+            gap: 8px;
+            overflow-y: auto;
+        }
+        .raid-panel h2 { font-size: 13px; color: #888; font-weight: 600; letter-spacing: 0.05em; flex-shrink: 0; }
+
+        .raid-item {
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            border: 1px solid transparent;
+            transition: background 0.15s;
+            cursor: default;
+        }
+        .raid-item.pass { color: #00ffcc; }
+        .raid-item.fail { color: #ff4d4d; cursor: pointer; }
+        .raid-item.fail:hover { background: rgba(255,77,77,0.12); }
+
+        #raidList { width: 200px; flex-shrink: 0; }
+
+        .raid-detail {
+            flex: 1;
+            border-top: none;
+            border-left: 1px solid #2e2e2e;
+            margin-top: 0;
+            padding-left: 16px;
+            min-width: 0;
+        }
+        .raid-detail h3 { font-size: 15px; color: #eee; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid #2e2e2e; }
+        .raid-stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            padding: 6px 0;
+            border-bottom: 1px solid #252525;
+        }
+        .raid-stat-row:last-child { border-bottom: none; }
+        .raid-stat-row.ok { color: #aaa; }
+        .raid-stat-row.shortage .label { color: #ff4d4d; }
+        .raid-stat-row .values { font-size: 12px; }
+        .raid-stat-row.ok .values { color: #00ffcc; }
+        .raid-stat-row.shortage .values { color: #ff4d4d; }
+
+        .grid-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .refine-panel {
+            width: 100%;
+            background: #1c1c1c;
+            border: 1px solid #2e2e2e;
+            border-radius: 10px;
+            padding: 10px 12px;
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .refine-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+        }
+
+        .refine-label { width: 40px; color: #aaa; flex-shrink: 0; }
+
+        .refine-bar-wrap {
+            width: 85px;
+            flex: none;
+            height: 4px;
+            background: #333;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .refine-bar {
+            height: 100%;
+            background: #00ffcc;
+            border-radius: 2px;
+            transition: width 0.2s;
+        }
+
+        .refine-val { width: 30px; text-align: right; font-size: 11px; color: #eee; }
+        .refine-max-val { width: 35px; color: #555; font-size: 11px; }
+
+        .refine-btn {
+            width: 20px;
+            height: 20px;
+            background: #2a2a2a;
+            border: 1px solid #3a3a3a;
+            border-radius: 4px;
+            color: #aaa;
+            cursor: pointer;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .refine-btn:hover { border-color: #555; color: #fff; }
+    </style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <h2>空裝素質　　　　<input type="checkbox" id="magic-mode" onchange="calculateTotal()">魔攻</h2>
+    <div class="stat-box">
+        <div class="stat-item">攻擊力   <input class="base-input" id="base-atk" type="number" value="0"></div>
+        <div class="stat-item">防禦力   <input class="base-input" id="base-def" type="number" value="0"></div>
+        <div class="stat-item">暴擊率   <input class="base-input" id="base-crit" type="number" value="0"></div>
+        <div class="stat-item">敏捷     <input class="base-input" id="base-agi" type="number" value="0"></div>
+        <div class="stat-item">意志     <input class="base-input" id="base-wil" type="number" value="0"></div>
+    </div>
+
+    <h2>角色總能力值</h2>
+    <div class="stat-box">
+        <div class="stat-item">攻擊力     <span class="stat-value" id="total-atk">0</span></div>
+        <div class="stat-item">防禦力     <span class="stat-value" id="total-def">0</span></div>
+        <div class="stat-item">暴擊率     <span class="stat-value" id="total-crit">0</span></div>
+        <div class="stat-item">平衡       <span class="stat-value" id="total-bal">0</span></div>
+        <div class="stat-item">追加傷害   <span class="stat-value" id="total-force">0</span></div>
+        <div class="stat-item">防禦力貫穿 <span class="stat-value" id="total-pen">0</span></div>
+        <div class="stat-item">攻擊速度   <span class="stat-value" id="total-speed">0</span></div>
+    </div>
+</aside>
+
+<main class="main-content" id="mainArea">
+    <div class="grid-wrapper">
+        <div class="grid-container" id="gridContainer">
+
+            <div class="grid-item" data-type="earring" onclick="openEnchantDirect(this)">
+                <img class="equipped-img">
+                <span class="slot-label">耳環</span>
+                <div class="enchant-trigger" onclick="event.stopPropagation(); toggleTooltip(this.parentElement)">▶</div>
+            </div>
+
+            <div class="grid-item" data-type="head" onclick="openEnchantDirect(this)">
+                <img class="equipped-img">
+                <span class="slot-label">頭部</span>
+                <div class="enchant-trigger" onclick="event.stopPropagation(); toggleTooltip(this.parentElement)">▶</div>
+            </div>
+
+            <div class="grid-item" data-type="necklace" onclick="openEnchantDirect(this)">
+                <img class="equipped-img">
+                <span class="slot-label">項鍊</span>
+                <div class="enchant-trigger" onclick="event.stopPropagation(); toggleTooltip(this.parentElement)">▶</div>
+            </div>
+
+            <div class="grid-item" data-type="weapon" onclick="openEnchantDirect(this)">
+                <img class="equipped-img">
+                <span class="slot-label">武器</span>
+                <div class="enchant-trigger" onclick="event.stopPropagation(); toggleTooltip(this.parentElement)">▶</div>
+            </div>
+
+            <div class="grid-item" data-type="chest" onclick="openEnchantDirect(this)">
+                <img class="equipped-img">
+                <span class="slot-label">胸部</span>
+                <div class="enchant-trigger" onclick="event.stopPropagation(); toggleTooltip(this.parentElement)">▶</div>
+            </div>
+
+            <div class="grid-item" data-type="totem" onclick="openEnchantDirect(this)">
+                <img class="equipped-img">
+                <span class="slot-label">護符</span>
+                <div class="enchant-trigger" onclick="event.stopPropagation(); toggleTooltip(this.parentElement)">▶</div>
+            </div>
+
+            <div>
+            </div>
+
+            <div class="grid-item" data-type="leg" onclick="openEnchantDirect(this)">
+                <img class="equipped-img">
+                <span class="slot-label">腿部</span>
+                <div class="enchant-trigger" onclick="event.stopPropagation(); toggleTooltip(this.parentElement)">▶</div>
+            </div>
+
+            <div class="grid-item" data-type="hand" onclick="openEnchantDirect(this)">
+                <img class="equipped-img">
+                <span class="slot-label">手部</span>
+                <div class="enchant-trigger" onclick="event.stopPropagation(); toggleTooltip(this.parentElement)">▶</div>
+            </div>
+
+            <div class="grid-item" data-type="belt" onclick="openEnchantDirect(this)">
+                <img class="equipped-img">
+                <span class="slot-label">腰帶</span>
+                <div class="enchant-trigger" onclick="event.stopPropagation(); toggleTooltip(this.parentElement)">▶</div>
+            </div>
+
+            <div class="grid-item" data-type="feet" onclick="openEnchantDirect(this)">
+                <img class="equipped-img">
+                <span class="slot-label">腳部</span>
+                <div class="enchant-trigger" onclick="event.stopPropagation(); toggleTooltip(this.parentElement)">▶</div>
+            </div>
+
+            <div class="grid-item" data-type="jewelry" onclick="openEnchantDirect(this)">
+                <img class="equipped-img">
+                <span class="slot-label">胸針</span>
+                <div class="enchant-trigger" onclick="event.stopPropagation(); toggleTooltip(this.parentElement)">▶</div>
+            </div>
+
+            <div class="grid-item" data-type="ring" onclick="openEnchantDirect(this)">
+                <img class="equipped-img">
+                <span class="slot-label">戒指</span>
+                <div class="enchant-trigger" onclick="event.stopPropagation(); toggleTooltip(this.parentElement)">▶</div>
+            </div>
+
+            <div class="grid-item" data-type="artifact" onclick="openEnchantDirect(this)">
+                <img class="equipped-img">
+                <span class="slot-label">技能道具</span>
+                <div class="enchant-trigger" onclick="event.stopPropagation(); toggleTooltip(this.parentElement)">▶</div>
+            </div>
+
+            <div class="grid-item" data-type="ring2" onclick="openEnchantDirect(this)">
+                <img class="equipped-img">
+                <span class="slot-label">戒指</span>
+                <div class="enchant-trigger" onclick="event.stopPropagation(); toggleTooltip(this.parentElement)">▶</div>
+            </div>
+
+            <div class="grid-item" data-type="bracelet" onclick="openEnchantDirect(this)">
+                <img class="equipped-img">
+                <span class="slot-label">手環</span>
+                <div class="enchant-trigger" onclick="event.stopPropagation(); toggleTooltip(this.parentElement)">▶</div>
+            </div>
+
+            <div class="grid-item" data-type="compass" onclick="openEnchantDirect(this)">
+                <img class="equipped-img">
+                <span class="slot-label">銀輪</span>
+                <div class="enchant-trigger" onclick="event.stopPropagation(); toggleTooltip(this.parentElement)">▶</div>
+            </div>
+
+            <div class="grid-item" data-type="bracelet2" onclick="openEnchantDirect(this)">
+                <img class="equipped-img">
+                <span class="slot-label">手環</span>
+                <div class="enchant-trigger" onclick="event.stopPropagation(); toggleTooltip(this.parentElement)">▶</div>
+            </div>
+
+        </div>
+        <div class="refine-panel" id="refinePanel"></div>
+    </div>
+
+    <!-- Detail Panel -->
+    <div id="detailPanel" class="detail-panel">
+        <h2 id="detailName">裝備名稱</h2>
+        <div class="enchant-sections">
+            <!-- 裝備本身（含稀有度選擇） -->
+            <div class="enchant-part">
+                <div class="enchant-row base-row">
+                    <div class="enchant-left">
+                        <div style="display:flex; flex-direction: column; gap:6px;">
+                            <select id="raritySelect" style="display:none; flex:1" onchange="applyRarity(this.value)">
+                                <option value="white">普通</option>
+                                <option value="green">🟩 初級</option>
+                                <option value="blue">🟦 中級</option>
+                                <option value="purple">🟪 高級</option>
+                                <option value="orange">🟧 稀有</option>
+                                <option value="red">🟥 傳說</option>
+                            </select>
+                            <select id="starSelect" style="display:none; flex:1" onchange="applyStar(this.value)">
+                                <option value="2">★★</option>
+                                <option value="3">★★★</option>
+                                <option value="4">★★★★</option>
+                                <option value="5">★★★★★</option>
+                            </select>
+                            <select id="upgradeSelect" style="display:none" onchange="applyUpgrade(this.value)">
+                                <option value="20">+20</option>
+                                <option value="19">+19</option>
+                                <option value="18">+18</option>
+                                <option value="17">+17</option>
+                                <option value="16">+16</option>
+                                <option value="15">+15</option>
+                                <option value="14">+14</option>
+                                <option value="13">+13</option>
+                                <option value="12">+12</option>
+                                <option value="11">+11</option>
+                                <option value="10">+10</option>
+                                <option value="9">+9</option>
+                                <option value="8">+8</option>
+                                <option value="7">+7</option>
+                                <option value="6">+6</option>
+                                <option value="5">+5</option>
+                                <option value="4">+4</option>
+                                <option value="3">+3</option>
+                                <option value="2">+2</option>
+                                <option value="1">+1</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="scroll-card has-content" id="baseStatCard"></div>
+                </div>    
+            </div>
+
+            <!-- 字首 -->
+            <div class="enchant-part">
+                <div class="enchant-row">
+                    <div class="enchant-left">
+                        <span class="enchant-label">字首</span>
+                        <select id="topSelect" onchange="applyEnchant('top', this.value)"></select>
+                    </div>
+                    <div class="scroll-card" id="topDetail"></div>
+                </div>
+            </div>
+
+            <!-- 字尾 -->
+            <div class="enchant-part">
+                <div class="enchant-row">
+                    <div class="enchant-left">
+                        <span class="enchant-label">字尾</span>
+                        <select id="endSelect" onchange="applyEnchant('end', this.value)"></select>
+                    </div>
+                    <div class="scroll-card" id="endDetail"></div>
+                </div>
+            </div>
+
+            <!-- 精靈石 -->
+            <div class="enchant-part">
+                <div class="enchant-row">
+                    <div class="enchant-left">
+                        <span class="enchant-label">精靈石</span>
+                        <select id="stoneSelect" onchange="applyEnchant('stone', this.value)"></select>
+                    </div>
+                    <div class="scroll-card" id="stoneDetail"></div>
+                </div>      
+            </div>
+         </div>
+    </div>
+
+    <!-- Raid Panel -->
+    <div class="raid-panel">
+        <div id="raidList"></div>
+        <div class="raid-detail" id="raidDetail">
+            <h3 id="raidDetailName"></h3>
+            <div id="raidDetailBody"></div>
+        </div>
+    </div>
+
+    <div id="itemTooltip"></div>
+</main>
+
+
+<script>
+    // ══════════════════════════════════════════
+    //  稀有度設定
+    // ══════════════════════════════════════════
+    const rarityList = [
+        { key: "green",  label: "初級" },
+        { key: "blue",   label: "中級" },
+        { key: "purple", label: "高級" },
+        { key: "orange", label: "稀有" },
+        { key: "red",    label: "傳說" },
+    ];
+
+    // ══════════════════════════════════════════
+    //  附魔資料庫（不變）
+    // ══════════════════════════════════════════
+    let enchantDb = {};
+    // ══════════════════════════════════════════
+    //  裝備資料庫
+    //  ★ 有稀有度的裝備：把 stats 換成 rarityStats
+    //  ★ 飾品（耳環/項鍊）沒有稀有度：保留原本的 stats
+    // ══════════════════════════════════════════
+    let itemDb = {};
+    // ══════════════════════════════════════════
+    //  套裝資料庫（不變）
+    // ══════════════════════════════════════════
+    let setDb = {};
+
+    const raidDb = [
+        { name: "扭曲的懺悔",        require: { atk: 54290, def: 32130, crit: 284, bal: 144, force: 7250, pen: 285 } },
+        { name: "貪婪的宴會廳",      require: { atk: 56920, def: 32830, crit: 290, bal: 152, force: 7350, pen: 300 } },
+        { name: "無法遵循的預言",    require: { atk: 57620, def: 33530, crit: 300, bal: 160, force: 7450, pen: 315 } },
+        { name: "遺忘正義的大教堂",  require: { atk: 58120, def: 34250, crit: 312, bal: 168, force: 7550, pen: 330 } },
+        { name: "豐饒之森",         require: { atk: 60120, def: 36250, crit: 322, bal: 178, force: 7750, pen: 350 } },
+        { name: "天地交會之處",     require: { atk: 63120, def: 37750, crit: 337, bal: 190, force: 8200, pen: 370 } },
+    ];
+
+    const labels = { atk:'攻擊力', def:'防禦力', crit:'暴擊率', bal:'平衡', force:'追加傷害', 
+                     pen:'防禦力貫穿', speed:'攻擊速度', str:'力量', agi:'敏捷', wil:'意志', int:'智力'};
+
+    let pairDb = {};
+
+    // ══════════════════════════════════════════
+    //  裝備狀態：★ 新增 rarity 欄位
+    // ══════════════════════════════════════════
+    let equippedState = {};
+    Object.keys(itemDb).forEach(key => {
+        equippedState[key] = { name: "", top: null, end: null, stone: null, refine: {}, rarity: "", upgradeLevel: 0, star: 2 };
+        //                                                                              ↑ 預設稀有度
+    });
+
+    let currentType = "";
+    let currentSlotEl = null;
+
+
+    //定義防具部位 需要+209來對應技能加成
+    const armorSlots = ['head', 'chest', 'leg', 'hand', 'feet'];
+    //星數
+    const starMultiplier = { 2: 1.00, 3: 1.02, 4: 1.04, 5: 1.06 };
+    const statStarMultiplier = { 2: 1.00, 3: 1.15, 4: 1.20, 5: 1.25 }; //四大主屬性 (str, int, agi, wil)
+    // ══════════════════════════════════════════
+    //  取得當前裝備的有效 stats（考慮稀有度）
+    // ══════════════════════════════════════════
+    function getItemStats(slot) {
+        const item = itemDb[slot]?.find(i => i.name === equippedState[slot].name);
+        if (!item) return null;
+
+        // ★ 有 rarityStats → 讀對應稀有度；否則讀 stats
+        if (item.rarityStats) {
+            const rarity = equippedState[slot].rarity || "";
+            const base = { ...(item.rarityStats[rarity] || {}) };
+            const star = equippedState[slot].star ?? 2;
+            // 2. 定義四大主屬性
+            const mainStats = new Set(['str', 'int', 'agi', 'wil']);
+            // 不需要乘算的特殊屬性（維持原樣）
+            const skipKeys = new Set(['crit', 'bal', 'speed', 'pen', 'force']);
+            Object.keys(base).forEach(k => {
+                if (skipKeys.has(k)) {
+                    // 跳過不處理的屬性（暴擊、平衡、速度等）
+                    return; 
+                }
+        
+                if (mainStats.has(k)) {
+                    // 如果是四大主屬性，套用 1.15 / 1.20 / 1.25 倍率
+                    const statMult = statStarMultiplier[star] ?? 1;
+                    base[k] = Math.floor(base[k] * statMult);
+                } else {
+                    // 如果是攻擊力(atk)或防禦力(def)等其他需要乘算的屬性，套用原本的 1.02 / 1.04 / 1.06 倍率
+                    const generalMult = starMultiplier[star] ?? 1;
+                    base[k] = Math.floor(base[k] * generalMult);
+                }
+    });
+    
+    return base;
+}
+
+        if (item.upgrade) {
+            const level = equippedState[slot].upgradeLevel || 0;
+            const base = { ...(item.stats || {}) };
+            const bonus = item.upgrade[level] || {};
+            Object.keys(bonus).forEach(k => base[k] = (base[k] || 0) + bonus[k]);
+            return base;
+        }
+        return item.stats || {};
+    }
+
+    // ══════════════════════════════════════════
+    //  API
+    // ══════════════════════════════════════════
+    async function loadData() {
+        const res = await fetch('/api/data');
+        const data = await res.json();
+        itemDb    = data.itemDb;
+        enchantDb = data.enchantDb;
+        setDb     = data.setDb;
+        pairDb    = data.pairDb;
+
+        // 資料載入完才初始化
+        Object.keys(itemDb).forEach(key => {
+            equippedState[key] = { name: "", top: null, end: null, stone: null, refine: {}, rarity: "", upgradeLevel: 0, star: 2 };
+        });
+        renderRaidList({ atk: 0, def: 0, crit: 0, bal: 0, pen: 0, speed: 0 });
+    }
+
+    loadData();
+    // ══════════════════════════════════════════
+    //  Tooltip（選裝備）
+    // ══════════════════════════════════════════
+    function toggleTooltip(el) {
+        const tooltip = document.getElementById('itemTooltip');
+        if (currentSlotEl === el && tooltip.style.display === 'flex') {
+            closeTooltip(); return;
+        }
+        if (currentSlotEl) currentSlotEl.classList.remove('active-slot');
+        currentSlotEl = el;
+        currentType = el.dataset.type;
+
+        const items = itemDb[currentType] || [];
+
+        // 新增：先顯示「無」選項（移除裝備）
+        const emptyOption = `<div style="width:58px;height:58px;background:#333;border:1px solid #444;border-radius:6px;
+                                  display:flex;align-items:center;justify-content:center;cursor:pointer;color:#ff4d4d;font-size:20px;" 
+                                  title="移除裝備" 
+                                  onclick="removeItem()">X</div>`;
+    
+        const itemOptions = items.map((item, i) =>
+            `<img src="${item.img}" class="tooltip-option" title="${item.name}" onclick="selectItem(${i})">`
+        ).join('');
+
+        tooltip.innerHTML = emptyOption + itemOptions;
+
+        const rect = el.getBoundingClientRect();
+        tooltip.style.left = (rect.right + 10) + 'px';
+        tooltip.style.top  = rect.top + 'px';
+        tooltip.style.display = 'flex';
+    }
+
+    function closeTooltip() {
+        document.getElementById('itemTooltip').style.display = 'none';
+        if (currentSlotEl) currentSlotEl.classList.remove('active-slot');
+    }
+
+    function selectItem(idx) {
+        const item = itemDb[currentType][idx];
+        equippedState[currentType].name = item.name;
+        // ★ 選新裝備時重置稀有度為預設值
+        equippedState[currentType].rarity = "white";
+
+        const imgEl = currentSlotEl.querySelector('img');
+        imgEl.src = item.img;
+        imgEl.style.display = 'block';
+
+        // ★ 更新格子邊框顏色
+        updateSlotRarityBorder(currentSlotEl, "");
+
+        showDetail(item.name);
+        document.getElementById('itemTooltip').style.display = 'none';
+        renderRefinePanel(currentType);
+        calculateTotal();
+        updateDetailTitle()
+        equippedState[currentType].star = 2;
+    }
+
+    function openEnchantDirect(el) {
+        const type = el.dataset.type;
+        if (!equippedState[type]?.name) {
+            toggleTooltip(el);
+            return;
+        }
+        currentType = type;
+        currentSlotEl = el;
+        showDetail(equippedState[currentType].name);
+        renderRefinePanel(currentType);
+    }
+
+    // ══════════════════════════════════════════
+    //  移除裝備
+    // ══════════════════════════════════════════
+    function removeItem() {
+        const imgEl = currentSlotEl.querySelector('img');
+        imgEl.src = '';
+        imgEl.style.display = 'none';
+
+        equippedState[currentType].name = "";
+        equippedState[currentType].rarity = "";
+        equippedState[currentType].top = null;
+        equippedState[currentType].end = null;
+        equippedState[currentType].stone = null;
+        equippedState[currentType].refine = {};
+        equippedState[currentType].star = 2;
+    
+        updateSlotRarityBorder(currentSlotEl, "");
+
+        // ★ 清空 detail-panel
+        document.getElementById('detailName').innerText = '裝備名稱';
+        document.getElementById('baseStatCard').innerHTML = '';
+        document.getElementById('topDetail').innerHTML = '';
+        document.getElementById('endDetail').innerHTML = '';
+        document.getElementById('stoneDetail').innerHTML = '';
+    
+        // ★ 清空並收起附魔卡片
+        ['topDetail', 'endDetail', 'stoneDetail'].forEach(id => {
+            const card = document.getElementById(id);
+            card.innerHTML = '';
+            card.classList.remove('has-content');
+        });
+        // 重置 select 的選項
+        ['topSelect', 'endSelect', 'stoneSelect'].forEach(id => {
+        document.getElementById(id).value = '';
+        });
+
+        // 隱藏所有選單
+        ['raritySelect', 'starSelect', 'upgradeSelect'].forEach(id => {
+            document.getElementById(id).style.display = 'none';
+        });
+    
+        // 隱藏精煉面板
+        document.getElementById('refinePanel').style.display = 'none';
+        
+        closeTooltip();
+        calculateTotal();
+    }
+
+    // ══════════════════════════════════════════
+    //  更新格子邊框稀有度顏色
+    // ══════════════════════════════════════════
+    function updateSlotRarityBorder(el, rarity) {
+        rarityList.forEach(r => el.classList.remove('rarity-' + r.key));
+        if (rarity) el.classList.add('rarity-' + rarity);
+    }
+    //星數選單
+    function applyStar(star) {
+        equippedState[currentType].star = parseInt(star);
+        renderBaseStatCard();
+        calculateTotal();
+    }
+
+    // ══════════════════════════════════════════
+    //  顯示 Detail Panel
+    // ══════════════════════════════════════════
+    function showDetail(name) {
+        updateDetailTitle();
+
+        ['top','end','stone'].forEach(t => {
+            const select = document.getElementById(`${t}Select`);
+            const available = Object.keys(enchantDb).filter(key => {
+                const e = enchantDb[key];
+                return e.type === t && (e.slots.includes(currentType) || e.slots.includes('all'));
+            });
+            select.innerHTML = `<option value="">（無）</option>` +
+                available.map(key => `<option value="${key}">${key}</option>`).join('');
+            select.value = equippedState[currentType][t] || '';
+            renderScrollCard(t, select.value);
+        });
+
+        // ★ 稀有度選單：有 rarityStats 才顯示
+        const item = itemDb[currentType].find(i => i.name === name);
+        const raritySelect = document.getElementById('raritySelect');
+        const upgradeSelect  = document.getElementById('upgradeSelect');
+        const starSelect = document.getElementById('starSelect');
+
+        if (item.rarityStats) {
+            raritySelect.style.display = 'block';
+            starSelect.style.display = 'block';
+            upgradeSelect.style.display  = 'none';
+            raritySelect.value = equippedState[currentType].rarity || "white";
+            starSelect.value = equippedState[currentType].star ?? 2;
+        } else if (item.upgrade) {
+            upgradeSelect.style.display = 'block';
+            raritySelect.style.display = 'none';
+            starSelect.style.display = 'none';
+            upgradeSelect.value = equippedState[currentType].upgradeLevel || 0;
+        } else {
+            raritySelect.style.display = 'none';
+            starSelect.style.display = 'none';
+            upgradeSelect.style.display  = 'none';
+        }
+
+        // 渲染裝備素質卡片
+        renderBaseStatCard();
+    }
+
+    // ══════════════════════════════════════════
+    //  ★ 新增：套用稀有度
+    // ══════════════════════════════════════════
+    function applyRarity(rarity) {
+        equippedState[currentType].rarity = rarity;
+
+        // 更新格子邊框顏色
+        if (currentSlotEl) updateSlotRarityBorder(currentSlotEl, rarity);
+
+        // 重新渲染素質卡片
+        renderBaseStatCard();
+        calculateTotal();
+        updateDetailTitle()
+    }
+
+    // ══════════════════════════════════════════
+    //  ★ 新增：渲染裝備素質卡片（抽出成獨立函式）
+    // ══════════════════════════════════════════
+    function renderBaseStatCard() {
+        const stats = getItemStats(currentType);
+        const card  = document.getElementById('baseStatCard');
+        if (stats && Object.keys(stats).length > 0) {
+            card.innerHTML = `<ul class="attr-list">
+                ${Object.keys(stats).map(k => `<li>${labels[k]} ${stats[k] > 0 ? '+' : ''}${stats[k]}</li>`).join('')}
+            </ul>`;
+        } else {
+            card.innerHTML = '<span style="color:#555;font-size:12px">（無素質）</span>';
+        }
+    }
+
+    // ══════════════════════════════════════════
+    //  附魔
+    // ══════════════════════════════════════════
+    function applyEnchant(type, scrollName) {
+        equippedState[currentType][type] = scrollName;
+        renderScrollCard(type, scrollName);
+        calculateTotal();
+        updateDetailTitle()
+    }
+
+    function renderScrollCard(type, name) {
+        const card = document.getElementById(`${type}Detail`);
+        if (!name) {
+            card.innerHTML = '';
+            card.classList.remove('has-content');
+            return;
+        }
+        const data = enchantDb[name].stats;
+        card.innerHTML = `<ul class="attr-list">
+            ${Object.keys(data).filter(k => data[k] !== 0)
+                .map(k => `<li>${labels[k]} ${data[k] > 0 ? '+' : ''}${data[k]}</li>`).join('')}
+        </ul>`;
+        card.classList.add('has-content');
+    }
+
+    // ══════════════════════════════════════════
+    //  精煉面板
+    // ══════════════════════════════════════════
+    function renderRefinePanel(type) {
+        const panel = document.getElementById('refinePanel');
+        const item  = itemDb[type]?.find(i => i.name === equippedState[type].name);
+
+        if (!item?.refine) { panel.style.display = 'none'; return; }
+
+        panel.style.display = 'flex';
+        panel.innerHTML = Object.keys(item.refine).map(k => {
+            const max = item.refine[k].max;
+            const val = equippedState[type].refine[k] || 0;
+            const hasStep = !!item.refine[k].step;
+            const stepPlus  = item.refine[k].step?.plus  ?? 1;
+            const stepMinus = item.refine[k].step?.minus ?? 1;
+            const pct = max > 0 ? (val / max * 100) : 0;
+            return `
+            <div class="refine-row">
+                <span class="refine-label">${labels[k]}</span>
+                <div class="refine-bar-wrap">
+                    <div class="refine-bar" id="refBar-${k}" style="width:${pct}%"></div>
+                </div>
+                <span class="refine-val" id="refVal-${k}">${val}</span>
+                <span class="refine-max-val">/ ${max}</span>
+                <button class="refine-btn" onclick="adjustRefine('${type}','${k}',${-stepMinus})">－</button>
+                <button class="refine-btn" onclick="adjustRefine('${type}','${k}',${stepPlus})">＋</button>
+                ${hasStep ? `<button class="refine-btn" onclick="clearRefine('${type}','${k}')">C</button>` : ''}
+            </div>`;
+        }).join('');
+    }
+
+    function clearRefine(type, stat) {
+        equippedState[type].refine[stat] = 0;
+        document.getElementById(`refBar-${stat}`).style.width = '0%';
+        document.getElementById(`refVal-${stat}`).innerText = 0;
+        calculateTotal();
+    }
+
+    function adjustRefine(type, stat, delta) {
+        const item = itemDb[type]?.find(i => i.name === equippedState[type].name);
+        const max  = item.refine[stat].max;
+        const cur  = equippedState[type].refine[stat] || 0;
+        const val  = Math.max(0, Math.min(max, cur + delta));
+        equippedState[type].refine[stat] = val;
+        document.getElementById(`refBar-${stat}`).style.width = (val / max * 100) + '%';
+        document.getElementById(`refVal-${stat}`).innerText = val;
+        calculateTotal();
+    }
+    //飾品等級
+    function applyUpgrade(level) {
+        equippedState[currentType].upgradeLevel = parseInt(level);
+        renderBaseStatCard();
+        calculateTotal();
+        updateDetailTitle();
+    }
+
+    // ══════════════════════════════════════════
+    //  ★ 計算核心（改用 getItemStats 取稀有度素質）
+    // ══════════════════════════════════════════
+    function getCurrentTotal() {
+        let total = { atk: 0, def: 0, crit: 0, bal: 0, force: 0, pen: 0, speed: 0, str: 0, agi: 0, wil: 0, int: 0};
+        const baseAgi = parseInt(document.getElementById('base-agi').value) || 0;
+        const baseWil = parseInt(document.getElementById('base-wil').value) || 0;
+
+        total.atk   += parseInt(document.getElementById('base-atk').value)   || 0;
+        total.def   += parseInt(document.getElementById('base-def').value)   || 0;
+        total.crit  += parseInt(document.getElementById('base-crit').value)  || 0;
+
+        Object.keys(equippedState).forEach(slot => {
+            const state = equippedState[slot];
+            if (!state.name) return;
+
+            // ★ 防禦專精：每件防具額外 +209 防禦
+            if (armorSlots.includes(slot)) {
+                total.def += 209;
+            }
+
+            // ★ 用 getItemStats 取得（考慮稀有度後的）素質
+            const stats = getItemStats(slot);
+            if (stats) Object.keys(total).forEach(k => total[k] += stats[k] || 0);
+
+            // 精煉加成
+            const baseItem = itemDb[slot]?.find(i => i.name === state.name);
+            if (baseItem?.refine && state.refine) {
+                const star = state.star ?? 2;
+                const mult = baseItem.rarityStats ? (starMultiplier[star] ?? 1) : 1;
+                Object.keys(state.refine).forEach(k => {
+                    total[k] = (total[k] || 0) + (state.refine[k] || 0) * mult;
+                });
+            }
+
+            // 附魔加成
+            ['top','end','stone'].forEach(t => {
+                const eName = state[t];
+                if (eName && enchantDb[eName]) {
+                    const s = enchantDb[eName].stats;
+                    Object.keys(total).forEach(k => total[k] += s[k] || 0);
+                }
+            });
+        });
+
+        // 套裝加成
+        const setCount = {};
+        Object.keys(equippedState).forEach(slot => {
+            const state = equippedState[slot];
+            if (!state.name) return;
+            const baseItem = itemDb[slot]?.find(i => i.name === state.name);
+            if (baseItem?.set) setCount[baseItem.set] = (setCount[baseItem.set] || 0) + 1;
+        });
+        Object.keys(setCount).forEach(setName => {
+            const bonus = setDb[setName]?.[setCount[setName]];
+            if (bonus) Object.keys(total).forEach(k => total[k] += bonus[k] || 0);
+        });
+
+        // 戒指套裝加成
+        Object.keys(pairDb).forEach(pairName => {
+            const pair = pairDb[pairName];
+            const equipped = pair.slots.map(slot => equippedState[slot]?.name || "");
+            const allMatch = pair.items.every(name => equipped.includes(name))
+                  && equipped.every(name => pair.items.includes(name));
+            if (allMatch) {
+                Object.keys(total).forEach(k => total[k] += pair.bonus[k] || 0);
+            }
+        });
+
+        // 力量換算攻擊力（無上限
+        const isMagic = document.getElementById('magic-mode').checked;
+        if (isMagic) {
+            total.atk += total.int * 2;
+        } else {
+            total.atk += total.str * 2.7;
+        }
+
+        // 敏捷換算防禦力（總敏捷封頂2000，只計算超出空裝敏捷的部分）
+        const totalAgi = Math.min(baseAgi + total.agi, 2000);
+        const extraAgi = totalAgi - baseAgi;
+        total.def += extraAgi * 0.5;
+
+        const totalWil = Math.min(baseWil + total.wil, 2000);
+        const extraWil = totalWil - baseWil;
+        total.crit += extraWil * 0.0075;
+
+        return total;
+    }
+
+    function calculateTotal() {
+        const total = getCurrentTotal();
+        document.getElementById('total-atk').innerText   = total.atk.toFixed(1);
+        document.getElementById('total-speed').innerText = total.speed;
+        document.getElementById('total-crit').innerText  = total.crit.toFixed(1);
+        document.getElementById('total-bal').innerText   = (total.bal+7);
+        document.getElementById('total-force').innerText = total.force;
+        document.getElementById('total-def').innerText   = total.def.toFixed(1);
+        document.getElementById('total-pen').innerText   = total.pen;
+        renderRaidList(total);
+
+        const raidDetail = document.getElementById('raidDetail');
+        const raidDetailName = document.getElementById('raidDetailName');
+        if (raidDetail.style.display === 'block' && raidDetailName.innerText) {
+            openRaidDetail(raidDetailName.innerText);
+        }
+    }
+
+    // ══════════════════════════════════════════
+    //  Raid
+    // ══════════════════════════════════════════
+    function renderRaidList(total) {
+        const list = document.getElementById('raidList');
+        list.innerHTML = raidDb.map(raid => {
+            const pass = Object.keys(raid.require).every(k => total[k] >= raid.require[k]);
+            return `<div class="raid-item ${pass ? 'pass' : 'fail'}"
+                        ${pass ? '' : `onclick="openRaidDetail('${raid.name}')"`}>
+                ${raid.name}
+            </div>`;
+        }).join('');
+    }
+
+    function openRaidDetail(name) {
+        const raid  = raidDb.find(r => r.name === name);
+        const total = getCurrentTotal();
+        document.getElementById('raidDetailName').innerText = name;
+        document.getElementById('raidDetailBody').innerHTML =
+            Object.keys(raid.require)
+                .filter(k => raid.require[k] > 0)
+                .map(k => {
+                    const ok = total[k] >= raid.require[k];
+                    return `<div class="raid-stat-row ${ok ? 'ok' : 'shortage'}">
+                        <span class="label">${labels[k]}</span>
+                        <span class="values">${total[k]} / ${raid.require[k]}</span>
+                    </div>`;
+                }).join('');
+        document.getElementById('raidDetail').style.display = 'block';
+    }
+
+    function updateDetailTitle() {
+        const state = equippedState[currentType];
+        const rarityLabelMap = { '':'', green:'初級', blue:'中級', purple:'高級', orange:'稀有', red:'傳說' };
+        const upgradeLabel = state.upgradeLevel > 0 ? `+${state.upgradeLevel}` : '';
+        const parts = [
+            rarityLabelMap[state.rarity],
+            upgradeLabel,
+            state.top,
+            state.end,
+            state.name
+        ].filter(Boolean).join(' ');
+        document.getElementById('detailName').innerText = parts;
+    }
+
+    // ══════════════════════════════════════════
+    //  事件
+    // ══════════════════════════════════════════
+    ['base-atk','base-crit','base-def','base-agi','base-wil'].forEach(id => {
+        document.getElementById(id).addEventListener('input', calculateTotal);
+    });
+
+    document.addEventListener('click', e => {
+        if (!e.target.closest('.grid-item') && !e.target.closest('#itemTooltip')) closeTooltip();
+    });
+
+    renderRaidList({ atk: 0, def: 0, crit: 0, bal: 0, pen: 0, speed: 0 });
+</script>
+</body>
+</html>
