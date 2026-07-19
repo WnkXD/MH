@@ -979,7 +979,8 @@
             starSelect.value = equippedState[currentType].star ?? 2;
         } else {
             raritySelect.style.display = 'none';
-            starSelect.style.display = 'none';
+            starSelect.style.display = 'block';
+            starSelect.value = equippedState[currentType].star ?? 2;
             upgradeSelect.style.display  = 'none';
         }
 
