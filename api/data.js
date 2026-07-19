@@ -257,6 +257,20 @@ export default function handler(req, res) {
             { name: "注視者的技能道具"    , img: "/accessory/artifact/13-blue.png",  stats: { atk: 500 , bal: 3 } },
             { name: "注視者的生鏽技能道具", img: "/accessory/artifact/13-green.png", stats: { atk: 500 , bal: 1 } },
         ],
+        
+        bracelet: [
+            { name: "未知的純銀手環", img: "/accessory/bracelet/1.png", gemSlots: 3, gemStatCount: 2 }, 
+        ],
+
+        bracelet2: [
+            { name: "未知的純銀手環", img: "/accessory/bracelet/1.png", gemSlots: 3, gemStatCount: 2 }, 
+        ],
+
+        compass: [
+            { name: "墮落者的完整銀輪", img: "/accessory/compass/8.png", stats: { atk: 2000 , crit: 10 } },
+            { name: "墮落者的生鏽銀輪", img: "/accessory/compass/5.png", stats: { atk: 1000 , crit: 5  } }, 
+        ],
+
         },
 
         enchantDb: { 
@@ -302,6 +316,8 @@ export default function handler(req, res) {
         "隱藏的":   { type: "top",   slots: ["earring","necklace"], stats: { atk: 700, speed: 1 } },
         "扭曲的":   { type: "top",   slots: ["earring","necklace"], stats: { atk: 450, speed: 1 } },
         "深刻的":   { type: "top",   slots: ["earring","necklace"], stats: { atk: 200, speed: 1 } },
+        //飾品字尾
+        "熱情":     { type: "end",   slots: ["earring","necklace","ring","ring2","jewelry"],stats: { def: 200 } } ,
         //戒指字首
         "對立的":   { type: "top",   slots: ["ring","ring2"],       stats: { bal: 9 } },
         "追蹤者的": { type: "top",   slots: ["ring","ring2"],       stats: { bal: 7 } },
@@ -315,6 +331,10 @@ export default function handler(req, res) {
         "循環的":   { type: "top",   slots: ["artifact"],           stats: { atk: 700, speed: 5, crit: 2, bal: 2, force: 50 } },
         //技能道具字尾
         "降臨":     { type: "end",   slots: ["artifact"],           stats: { atk: 450, crit: 2, bal: 2 } } ,
+        //銀輪字首
+        "果斷的":   { type: "top",   slots: ["compass"],            stats: { atk: -280, speed: 5, bal: 7 } },
+        //銀輪字尾
+        "衝突":     { type: "end",   slots: ["compass"],            stats: { crit: 2 } },
         //精靈石
         "暴擊+2":   { type: "stone", 
                       slots: ["earring","necklace","weapon","totem","belt","jewelry","ring","ring2"], stats: { crit: 2 } },

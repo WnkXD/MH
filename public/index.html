@@ -793,7 +793,7 @@
 
         // 資料載入完才初始化
         Object.keys(itemDb).forEach(key => {
-            equippedState[key] = { name: "", top: null, end: null, stone: null, refine: {}, rarity: "", upgradeLevel: 0, star: 2 };
+            equippedState[key] = { name: "", top: null, end: null, stone: null, refine: {}, rarity: "", upgradeLevel: 0, star: 2, gems:[] };
         });
         renderRaidList({ atk: 0, def: 0, crit: 0, bal: 0, pen: 0, speed: 0 });
     }
@@ -894,6 +894,7 @@
         equippedState[currentType].stone = null;
         equippedState[currentType].refine = {};
         equippedState[currentType].star = 2;
+        equippedState[currentType].gems = [];
     
         updateSlotRarityBorder(currentSlotEl, "");
 
@@ -1044,16 +1045,21 @@
     }
 
     // ══════════════════════════════════════════
-    //  精煉面板
+    //  精煉、手環面板
     // ══════════════════════════════════════════
     function renderRefinePanel(type) {
         const panel = document.getElementById('refinePanel');
         const item  = itemDb[type]?.find(i => i.name === equippedState[type].name);
 
-        if (!item?.refine) { panel.style.display = 'none'; return; }
+        // 兩者都沒有就隱藏
+        if (!item?.refine && !item?.gemSlots) { panel.style.display = 'none'; return; }
 
         panel.style.display = 'flex';
-        panel.innerHTML = Object.keys(item.refine).map(k => {
+        panel.innerHTML = '';
+
+        // 精煉部分
+        if (item.refine) { 
+            panel.innerHTML += Object.keys(item.refine).map(k => {
             const max = item.refine[k].max;
             const val = equippedState[type].refine[k] || 0;
             const hasStep = !!item.refine[k].step;
@@ -1072,7 +1078,43 @@
                 <button class="refine-btn" onclick="adjustRefine('${type}','${k}',${stepPlus})">＋</button>
                 ${hasStep ? `<button class="refine-btn" onclick="clearRefine('${type}','${k}')">C</button>` : ''}
             </div>`;
-        }).join('');
+            }).join('');
+        }
+
+        // 寶石部分
+        if (item.gemSlots) {
+            // 確保 gems 陣列長度正確
+            if (!equippedState[type].gems || equippedState[type].gems.length !== item.gemSlots) {
+                equippedState[type].gems = Array.from({ length: item.gemSlots }, () => 
+                Array.from({ length: item.gemStatCount ?? 1 }, () => ({ stat: '', val: 0 }))
+                );
+            }
+
+            panel.innerHTML += `<div style="border-top:0.5px solid var(--border);padding-top:8px;margin-top:4px;">
+                ${equippedState[type].gems.map((gem, i) => `
+                <div style="margin-bottom:6px;">
+                    <span style="font-size:11px;color:#888;">寶石 ${i+1}</span>
+                    ${gem.map((g, j) => `
+                    <div class="refine-row">
+                        <select style="flex:1;font-size:12px;" onchange="applyGem('${type}',${i},${j},'stat',this.value)">
+                            <option value="">無</option>
+                            ${['atk','def'].map(s =>
+                                `<option value="${s}" ${g.stat===s?'selected':''}>${labels[s]}</option>`
+                            ).join('')}
+                        </select>
+                        <input type="number" class="base-input" style="width:60px;" value="${g.val||''}"
+                            onchange="applyGem('${type}',${i},${j},'val',this.value)">
+                    </div>`).join('')}
+                </div>`).join('')}
+            </div>`;
+            }
+        }
+
+    //寶石函式
+    function applyGem(type, i, j, field, value) {
+        if (!equippedState[type].gems) return;
+        equippedState[type].gems[i][j][field] = field === 'val' ? (parseInt(value) || 0) : value;
+        calculateTotal();
     }
 
     function clearRefine(type, stat) {
@@ -1142,6 +1184,13 @@
                     const s = enchantDb[eName].stats;
                     Object.keys(total).forEach(k => total[k] += s[k] || 0);
                 }
+            });
+
+            // 寶石加成
+            state.gems.forEach(gemStats => {
+                gemStats.forEach(g => {
+                    if (g.stat && g.val > 0) total[g.stat] = (total[g.stat] || 0) + g.val;
+                });
             });
         });
 
