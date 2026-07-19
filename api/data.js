@@ -148,7 +148,7 @@ export default function handler(req, res) {
 
         totem: [
             { name: "埃柳之書",   img: "/accessory/totem/2.png",
-              stats: { atk: 1410, crit: 10, speed: 3, def: 3590, str: 180, agi: 90, int: 243, wil: 80 }, },
+              stats: { atk: 1910, crit: 13, speed: 3, def: 3590, str: 180, agi: 90, int: 243, wil: 80 }, },
             { name: "兀恩雅之書", img: "/accessory/totem/1.png",
               stats: { atk: 1410, crit: 10, speed: 3, def: 3090, str: 180, agi: 90, int: 243, wil: 80 }, },
         ],
