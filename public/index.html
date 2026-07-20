@@ -1090,22 +1090,33 @@
                 );
             }
 
+            // 1. 定義自訂的寶石名稱選單 (依序對應 i = 0, 1, 2...)
+            const gemNames = ['鑽石寶石', '藍寶石', '紅寶石', '綠寶石',];
+
             panel.innerHTML += `<div style="border-top:0.5px solid var(--border);padding-top:8px;margin-top:4px;">
-                ${equippedState[type].gems.map((gem, i) => `
-                <div style="margin-bottom:6px;">
-                    <span style="font-size:11px;color:#888;">寶石 ${i+1}</span>
-                    ${gem.map((g, j) => `
-                    <div class="refine-row">
-                        <select style="flex:1;font-size:12px;" onchange="applyGem('${type}',${i},${j},'stat',this.value)">
-                            <option value="">無</option>
-                            ${['atk','def'].map(s =>
-                                `<option value="${s}" ${g.stat===s?'selected':''}>${labels[s]}</option>`
-                            ).join('')}
-                        </select>
-                        <input type="number" class="base-input" style="width:60px;" value="${g.val||''}"
-                            onchange="applyGem('${type}',${i},${j},'val',this.value)">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+                    ${equippedState[type].gems.map((gem, i) => `
+                    <div style="background:rgba(255,255,255,0.03);border:0.5px solid var(--border);border-radius:6px;padding:6px;">
+                        ${/* 👈 這裡用 gemNames[i] 取得對應名稱；如果超過長度就回傳預設名稱 */''}
+                        <span style="font-size:11px;color:#888;display:block;margin-bottom:4px;">
+                            ${gemNames[i] || `寶石 ${i+1}`}
+                        </span>
+                        
+                        ${/* 強制第一格固定為 ATK */''}
+                        <div class="refine-row" style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+                            <span style="font-size:12px;width:36px;color:#ccc;">${labels['atk']}</span>
+                            <input type="number" class="base-input" style="flex:1;" placeholder="0" value="${gem[0]?.val || ''}"
+                                onchange="applyGem('${type}',${i},0,'stat','atk'); applyGem('${type}',${i},0,'val',this.value)">
+                        </div>
+
+                        ${/* 強制第二格固定為 DEF */''}
+                        <div class="refine-row" style="display:flex;align-items:center;gap:6px;">
+                            <span style="font-size:12px;width:36px;color:#ccc;">${labels['def']}</span>
+                            <input type="number" class="base-input" style="flex:1;" placeholder="0" value="${gem[1]?.val || ''}"
+                                onchange="applyGem('${type}',${i},1,'stat','def'); applyGem('${type}',${i},1,'val',this.value)">
+                        </div>
                     </div>`).join('')}
-                </div>`).join('')}
+                </div>    
             </div>`;
             }
         }

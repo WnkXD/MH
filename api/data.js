@@ -259,11 +259,13 @@ export default function handler(req, res) {
         ],
         
         bracelet: [
-            { name: "未知的純銀手環", img: "/accessory/bracelet/1.png", gemSlots: 3, gemStatCount: 2 }, 
+            { name: "君主的完整黑曜石手環", img: "/accessory/bracelet/5.png", stats: { atk: 1000, crit: 5 }, gemSlots: 4, gemStatCount: 2 },
+            { name: "未知的黃金手環"     , img: "/accessory/bracelet/1.png", gemSlots: 4, gemStatCount: 2 }, 
         ],
 
         bracelet2: [
-            { name: "未知的純銀手環", img: "/accessory/bracelet/1.png", gemSlots: 3, gemStatCount: 2 }, 
+            { name: "君主的完整黑曜石手環", img: "/accessory/bracelet/5.png", stats: { atk: 1000, crit: 5 }, gemSlots: 4, gemStatCount: 2 },
+            { name: "未知的黃金手環"     , img: "/accessory/bracelet/1.png", gemSlots: 4, gemStatCount: 2 }, 
         ],
 
         compass: [
