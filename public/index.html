@@ -252,6 +252,7 @@
             display: block;
             margin-bottom: 5px;
         }
+        /*裝備文字*/
         .attr-list {
             list-style: none;
             font-size: 14px;
@@ -1093,12 +1094,12 @@
             // 1. 定義自訂的寶石名稱選單 (依序對應 i = 0, 1, 2...)
             const gemNames = ['鑽石寶石', '藍寶石', '紅寶石', '綠寶石',];
 
-            panel.innerHTML += `<div style="border-top:0.5px solid var(--border);padding-top:8px;margin-top:4px;">
+            panel.innerHTML += `<div style="border-top:0.5px solid var(--border);">
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
                     ${equippedState[type].gems.map((gem, i) => `
                     <div style="background:rgba(255,255,255,0.03);border:0.5px solid var(--border);border-radius:6px;padding:6px;">
                         ${/* 👈 這裡用 gemNames[i] 取得對應名稱；如果超過長度就回傳預設名稱 */''}
-                        <span style="font-size:11px;color:#888;display:block;margin-bottom:4px;">
+                        <span style="font-size:11px;color:#ffc107;display:block;margin-bottom:4px;">
                             ${gemNames[i] || `寶石 ${i+1}`}
                         </span>
                         
