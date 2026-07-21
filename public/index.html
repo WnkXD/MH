@@ -348,6 +348,7 @@
             cursor: default;
         }
         .raid-item.pass { color: #00ffcc; }
+        .raid-item.pass:hover { background: rgba(40, 156, 36, 0.12); }
         .raid-item.fail { color: #ff4d4d; cursor: pointer; }
         .raid-item.fail:hover { background: rgba(255,77,77,0.12); }
 
@@ -461,6 +462,13 @@
         <div class="stat-item">防禦力貫穿 <span class="stat-value" id="total-pen">0</span></div>
         <div class="stat-item">攻擊速度   <span class="stat-value" id="total-speed">0</span></div>
     </div>
+
+    <button onclick="saveConfig()" style="
+        width:100%; padding:8px; background:#2a2a2a; color:#ddd;
+        border:1px solid #3a3a3a; border-radius:6px; cursor:pointer;
+        font-size:13px; font-family:inherit;">
+        💾 儲存配置
+    </button>
 </aside>
 
 <main class="main-content" id="mainArea">
@@ -798,9 +806,45 @@
             equippedState[key] = { name: "", top: null, end: null, stone: null, refine: {}, rarity: "", upgradeLevel: 0, star: 2, gems:[] };
         });
         renderRaidList({ atk: 0, def: 0, crit: 0, bal: 0, pen: 0, speed: 0 });
+        loadConfig();
     }
 
     loadData();
+
+    //讀取函式
+    function loadConfig() {
+        const raw = localStorage.getItem('equipSave');
+        if (!raw) return;
+        const save = JSON.parse(raw);
+
+        // 還原空裝素質
+        Object.entries(save.baseValues).forEach(([id, val]) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            if (el.type === 'checkbox') el.checked = val;
+            else el.value = val;
+        });
+
+        // 還原裝備狀態（只還原 itemDb 裡有的 slot）
+        Object.keys(save.equippedState).forEach(slot => {
+            if (equippedState[slot] !== undefined) {
+                equippedState[slot] = save.equippedState[slot];
+                // 還原格子圖片
+                const slotEl = document.querySelector(`.grid-item[data-type="${slot}"]`);
+                if (slotEl && equippedState[slot].name) {
+                    const item = itemDb[slot]?.find(i => i.name === equippedState[slot].name);
+                    if (item) {
+                        const imgEl = slotEl.querySelector('img');
+                        imgEl.src = item.img;
+                        imgEl.style.display = 'block';
+                        updateSlotRarityBorder(slotEl, equippedState[slot].rarity);
+                    }
+                }
+            }
+        });
+
+        calculateTotal();
+    }
     // ══════════════════════════════════════════
     //  Tooltip（選裝備）
     // ══════════════════════════════════════════
@@ -1159,7 +1203,7 @@
     //  ★ 計算核心（改用 getItemStats 取稀有度素質）
     // ══════════════════════════════════════════
     function getCurrentTotal() {
-        let total = { atk: 0, def: 0, crit: 0, bal: 0, force: 0, pen: 0, speed: 0, str: 0, agi: 0, wil: 0, int: 0};
+        let total = { atk: 0, def: 0, crit: 0, bal: 7, force: 0, pen: 0, speed: 0, str: 0, agi: 0, wil: 0, int: 0};
         const baseAgi = parseInt(document.getElementById('base-agi').value) || 0;
         const baseWil = parseInt(document.getElementById('base-wil').value) || 0;
 
@@ -1256,7 +1300,7 @@
         document.getElementById('total-atk').innerText   = total.atk.toFixed(1);
         document.getElementById('total-speed').innerText = total.speed;
         document.getElementById('total-crit').innerText  = total.crit.toFixed(1);
-        document.getElementById('total-bal').innerText   = (total.bal+7);
+        document.getElementById('total-bal').innerText   = total.bal;
         document.getElementById('total-force').innerText = total.force;
         document.getElementById('total-def').innerText   = total.def.toFixed(1);
         document.getElementById('total-pen').innerText   = total.pen;
@@ -1276,14 +1320,13 @@
         const list = document.getElementById('raidList');
         list.innerHTML = raidDb.map(raid => {
             const pass = Object.keys(raid.require).every(k => total[k] >= raid.require[k]);
-            return `<div class="raid-item ${pass ? 'pass' : 'fail'}"
-                        ${pass ? '' : `onclick="openRaidDetail('${raid.name}')"`}>
+            return `<div class="raid-item ${pass ? 'pass' : 'fail'}" onclick="openRaidDetail('${raid.name}')">
                 ${raid.name}
             </div>`;
         }).join('');
     }
 
-    function openRaidDetail(name) {
+    /*function openRaidDetail(name) {
         const raid  = raidDb.find(r => r.name === name);
         const total = getCurrentTotal();
         document.getElementById('raidDetailName').innerText = name;
@@ -1295,6 +1338,36 @@
                     return `<div class="raid-stat-row ${ok ? 'ok' : 'shortage'}">
                         <span class="label">${labels[k]}</span>
                         <span class="values">${total[k]} / ${raid.require[k]}</span>
+                    </div>`;
+                }).join('');
+        document.getElementById('raidDetail').style.display = 'block';
+    }*/
+
+    function openRaidDetail(name) {
+        const raid  = raidDb.find(r => r.name === name);
+        const total = getCurrentTotal();
+        document.getElementById('raidDetailName').innerText = name;
+        document.getElementById('raidDetailBody').innerHTML =
+            Object.keys(raid.require)
+                .filter(k => raid.require[k] > 0)
+                .map(k => {
+                    let val = total[k] || 0;
+
+                    // 💡 依據屬性類別進行手動進位/捨去修正
+                    if (['atk', 'def', 'crit'].includes(k)) {
+                        val = Math.ceil(val);  // 無條件進位
+                    } else if (k === 'bal') {
+                        val = Math.floor(val); // 無條件捨去
+                    } else {
+                        val = Math.floor(val); // 其他屬性預設捨去（也可依需要微調）
+                    }
+
+                    // 用修正後的 val 來比對門檻
+                    const ok = val >= raid.require[k];
+
+                    return `<div class="raid-stat-row ${ok ? 'ok' : 'shortage'}">
+                        <span class="label">${labels[k]}</span>
+                        <span class="values">${val} / ${raid.require[k]}</span>
                     </div>`;
                 }).join('');
         document.getElementById('raidDetail').style.display = 'block';
@@ -1312,6 +1385,21 @@
             state.name
         ].filter(Boolean).join(' ');
         document.getElementById('detailName').innerText = parts;
+    }
+
+    //儲存裝備內容
+    function saveConfig() {
+        const baseValues = {};
+        ['base-atk','base-crit','base-def','base-agi','base-wil'].forEach(id => {
+            baseValues[id] = document.getElementById(id).value;
+        });
+        baseValues['magic-mode'] = document.getElementById('magic-mode').checked;
+
+        localStorage.setItem('equipSave', JSON.stringify({
+            equippedState,
+            baseValues,
+        }));
+        alert('已儲存！');
     }
 
     // ══════════════════════════════════════════
