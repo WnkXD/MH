@@ -89,7 +89,7 @@ export default function handler(req, res) {
                     green:  { atk: 38650, bal: 76, crit: 137, force: 4400, speed: 47, str: 110, agi: 60, int: 148, wil: 80},
                     blue:   { atk: 39900, bal: 77, crit: 138, force: 4550, speed: 47, str: 110, agi: 60, int: 148, wil: 80},
                     purple: { atk: 41150, bal: 78, crit: 139, force: 4700, speed: 47, str: 110, agi: 60, int: 148, wil: 80},
-                    orange: { atk: 7 },
+                    orange: { atk: 42400, bal: 79, crit: 140, force: 4850, speed: 47, str: 110, agi: 60, int: 148, wil: 80},
                     red:    { atk: 9 },
                 },
                 refine: {
@@ -183,6 +183,19 @@ export default function handler(req, res) {
 
         hand: [
             {
+                name: "埃柳護手", img: "/gear/hand/2.png", set: "埃柳",
+                rarityStats: {
+                    white:  { force: 900 , def:4888, str: 225, agi: 113, int: 304, wil: 100 },
+                    green:  { force: 945 , def:5118, str: 225, agi: 113, int: 304, wil: 100 },
+                    blue:   { force: 990 , def:5348, str: 225, agi: 113, int: 304, wil: 100 },
+                    purple: { force: 1035, def:5578, str: 225, agi: 113, int: 304, wil: 100 },
+                    orange: { force: 1080, def:5808, str: 225, agi: 113, int: 304, wil: 100 },
+                    red:    { force: 1125, def:6158, str: 225, agi: 113, int: 304, wil: 100 },
+                },
+                refine: { def:  { max: 479, step: { plus: 50, minus: 10} }, }
+            },
+
+            {
                 name: "兀恩雅護手", img: "/gear/hand/1.png", set: "兀恩雅",
                 rarityStats: {
                     white:  { force: 750, def:4338, str: 225, agi: 113, int: 304, wil: 100 },
@@ -238,6 +251,32 @@ export default function handler(req, res) {
         ],
 
         ring: [
+            { name: "必滅枷鎖", img: "/accessory/ring/125-1.png", stats: { bal: 9, crit: 8, str: 140, agi:70, int: 180, wil: 80 },
+              upgrade: { 0:{},
+                         1 :{atk:16,pen: 7},2:{atk:32, pen:13},3:{atk:48, pen:20},4:{atk:64, pen:26},5 :{atk:80, pen:33},
+                         6 :{atk:96,pen:39},7:{atk:112,pen:46},8:{atk:128,pen:52},9:{atk:144,pen:59},10:{atk:160,pen:65},
+                         11:{atk:176,pen:72} ,12:{atk:192,pen:78 },13:{atk:208,pen:85} ,14:{atk:224,pen:91 },15:{atk:240,pen:98 }, 
+                         16:{atk:256,pen:104},17:{atk:272,pen:111},18:{atk:288,pen:117},19:{atk:304,pen:124},20:{atk:320,pen:130},
+                        }
+            },
+
+            { name: "沉默的證明", img: "/accessory/ring/120-2.png", stats: { bal:8, crit: 6, str: 140, agi: 70, int: 180, wil: 80 } ,
+              upgrade: { 0 :{}, 
+                         1 :{atk:15, pen: 6}, 2:{atk:30,pen: 11}, 3:{atk:45,pen: 17}, 4:{atk:60,pen:22},   5:{atk:75, pen:28},
+                         6 :{atk:90, pen:33}, 7:{atk:105,pen:39}, 8:{atk:120,pen:44}, 9:{atk:135,pen:50}, 10:{atk:150,pen:55},
+                         11:{atk:165,pen:61},12:{atk:180,pen:66},13:{atk:195,pen:72},14:{atk:210,pen:77}, 15:{atk:225,pen:83}, 
+                         16:{atk:240,pen:88},17:{atk:255,pen:94},18:{atk:270,pen:99},19:{atk:285,pen:105},20:{atk:300,pen:110},
+                        },
+            },
+            { name: "寂靜的證明", img: "/accessory/ring/120-1.png", stats: { bal:6, crit: 8, str: 140, agi: 70, int: 180, wil: 80 } ,
+              upgrade: { 0 :{}, 
+                         1 :{atk:15, pen: 6}, 2:{atk:30,pen: 11}, 3:{atk:45,pen: 17}, 4:{atk:60,pen:22},   5:{atk:75, pen:28},
+                         6 :{atk:90, pen:33}, 7:{atk:105,pen:39}, 8:{atk:120,pen:44}, 9:{atk:135,pen:50}, 10:{atk:150,pen:55},
+                         11:{atk:165,pen:61},12:{atk:180,pen:66},13:{atk:195,pen:72},14:{atk:210,pen:77}, 15:{atk:225,pen:83}, 
+                         16:{atk:240,pen:88},17:{atk:255,pen:94},18:{atk:270,pen:99},19:{atk:285,pen:105},20:{atk:300,pen:110},
+                        },
+            },
+            
             { name: "暗之暈", img: "/accessory/ring/115-1.png", stats: { bal: 5,  crit: 6, str: 140, agi: 70, int: 180, wil: 80 },
             upgrade: { 0:{}, 20:{atk:280,pen:90} } },
             { name: "暗之影", img: "/accessory/ring/115-2.png", stats: { bal: 5,  crit: 6, str: 140, agi: 70, int: 180, wil: 80 },
@@ -245,6 +284,32 @@ export default function handler(req, res) {
         ],
 
         ring2: [
+            { name: "必滅枷鎖", img: "/accessory/ring/125-1.png", stats: { bal: 9, crit: 8, str: 140, agi:70, int: 180, wil: 80 },
+              upgrade: { 0:{},
+                         1 :{atk:16,pen: 7},2:{atk:32, pen:13},3:{atk:48, pen:20},4:{atk:64, pen:26},5 :{atk:80, pen:33},
+                         6 :{atk:96,pen:39},7:{atk:112,pen:46},8:{atk:128,pen:52},9:{atk:144,pen:59},10:{atk:160,pen:65},
+                         11:{atk:176,pen:72} ,12:{atk:192,pen:78 },13:{atk:208,pen:85} ,14:{atk:224,pen:91 },15:{atk:240,pen:98 }, 
+                         16:{atk:256,pen:104},17:{atk:272,pen:111},18:{atk:288,pen:117},19:{atk:304,pen:124},20:{atk:320,pen:130},
+                        }
+            },
+
+            { name: "沉默的證明", img: "/accessory/ring/120-2.png", stats: { bal:8, crit: 6, str: 140, agi: 70, int: 180, wil: 80 } ,
+              upgrade: { 0 :{}, 
+                         1 :{atk:15, pen: 6}, 2:{atk:30,pen: 11}, 3:{atk:45,pen: 17}, 4:{atk:60,pen:22},   5:{atk:75, pen:28},
+                         6 :{atk:90, pen:33}, 7:{atk:105,pen:39}, 8:{atk:120,pen:44}, 9:{atk:135,pen:50}, 10:{atk:150,pen:55},
+                         11:{atk:165,pen:61},12:{atk:180,pen:66},13:{atk:195,pen:72},14:{atk:210,pen:77}, 15:{atk:225,pen:83}, 
+                         16:{atk:240,pen:88},17:{atk:255,pen:94},18:{atk:270,pen:99},19:{atk:285,pen:105},20:{atk:300,pen:110},
+                        },
+            },
+            { name: "寂靜的證明", img: "/accessory/ring/120-1.png", stats: { bal:6, crit: 8, str: 140, agi: 70, int: 180, wil: 80 } ,
+              upgrade: { 0 :{}, 
+                         1 :{atk:15, pen: 6}, 2:{atk:30,pen: 11}, 3:{atk:45,pen: 17}, 4:{atk:60,pen:22},   5:{atk:75, pen:28},
+                         6 :{atk:90, pen:33}, 7:{atk:105,pen:39}, 8:{atk:120,pen:44}, 9:{atk:135,pen:50}, 10:{atk:150,pen:55},
+                         11:{atk:165,pen:61},12:{atk:180,pen:66},13:{atk:195,pen:72},14:{atk:210,pen:77}, 15:{atk:225,pen:83}, 
+                         16:{atk:240,pen:88},17:{atk:255,pen:94},18:{atk:270,pen:99},19:{atk:285,pen:105},20:{atk:300,pen:110},
+                        },
+            },
+
             { name: "暗之暈", img: "/accessory/ring/115-1.png", stats: { bal: 5,  crit: 6, str: 140, agi: 70, int: 180, wil: 80 },
             upgrade: { 0:{}, 20:{atk:280,pen:90} } },
             { name: "暗之影", img: "/accessory/ring/115-2.png", stats: { bal: 5,  crit: 6, str: 140, agi: 70, int: 180, wil: 80 },
@@ -270,6 +335,8 @@ export default function handler(req, res) {
 
         compass: [
             { name: "墮落者的完整銀輪", img: "/accessory/compass/8.png", stats: { atk: 2000 , crit: 10 } },
+            { name: "墮落者的閃亮銀輪", img: "/accessory/compass/7.png", stats: { atk: 1000 , crit: 7 } },
+            { name: "墮落者的銀輪"    , img: "/accessory/compass/6.png", stats: { atk: 1000 , crit: 7 } },
             { name: "墮落者的生鏽銀輪", img: "/accessory/compass/5.png", stats: { atk: 1000 , crit: 5  } }, 
         ],
 
@@ -289,6 +356,7 @@ export default function handler(req, res) {
         "鬥魂":     { type: "end",   slots: ["head","leg"],      stats: { atk: 285, def: 280, crit: 8 } },
         "進擊":     { type: "end",   slots: ["head","leg"],      stats: { atk: 285, def: 280, crit: 5 } },
         //手腳字首
+        "渲染的":   { type: "top",   slots: ["hand","feet"],     stats: { atk: 145, def: 300, speed: 2, crit: 6, bal: 7 } } ,
         "優雅的":   { type: "top",   slots: ["hand","feet"],     stats: { atk: 145, def: 300, speed: 2, crit: 4, bal: 5 } } ,
         "悲痛的":   { type: "top",   slots: ["hand","feet"],     stats: { atk: 145, def: 300, speed: 2, crit: 3, bal: 4 } } ,
         //手腳字尾
@@ -302,6 +370,7 @@ export default function handler(req, res) {
         //胸部字尾
         "試煉":     { type: "end",   slots: ["chest"],             stats: { def: 120, crit: 12, bal: -1 } } ,
         "悲嘆":     { type: "end",   slots: ["chest"],             stats: { def: 120, crit: 9, bal: -1 } } ,
+        "熱心":     { type: "end",   slots: ["chest","leg"],       stats: { atk:282, def: -370, bal: 5 } } ,
         //書字首
         "虛無的":   { type: "top",   slots: ["totem"],             stats: { speed: 1, def: 1000, crit: 4 } } ,
         "勝者的":   { type: "top",   slots: ["totem"],             stats: { speed: 1, def: 800, crit: 2 } } ,
@@ -315,15 +384,20 @@ export default function handler(req, res) {
         "強烈的":   { type: "top",   slots: ["belt"],              stats: { speed: 1, crit: 3, bal: 1 } } ,
         //腰帶字尾
         //飾品字首
+        "狂風的":   { type: "top",   slots: ["earring","necklace","belt","ring","ring2","jewelry"],stats: { atk:700,speed:5, crit:-4, bal:-4 } } ,
         "隱藏的":   { type: "top",   slots: ["earring","necklace"], stats: { atk: 700, speed: 1 } },
         "扭曲的":   { type: "top",   slots: ["earring","necklace"], stats: { atk: 450, speed: 1 } },
         "深刻的":   { type: "top",   slots: ["earring","necklace"], stats: { atk: 200, speed: 1 } },
         //飾品字尾
+        "波動":     { type: "end",   slots: ["earring","necklace","ring","ring2","jewelry"],stats: { atk:300 } } ,
+        "思念":     { type: "end",   slots: ["earring","necklace","ring","ring2","jewelry"],stats: { bal:1, def: 500 } } ,
         "熱情":     { type: "end",   slots: ["earring","necklace","ring","ring2","jewelry"],stats: { def: 200 } } ,
         //戒指字首
-        "對立的":   { type: "top",   slots: ["ring","ring2"],       stats: { bal: 9 } },
-        "追蹤者的": { type: "top",   slots: ["ring","ring2"],       stats: { bal: 7 } },
+        "徬徨的":   { type: "top",   slots: ["ring","ring2"],       stats: { bal: 12 } },
+        "對立的":   { type: "top",   slots: ["ring","ring2"],       stats: { bal: 9  } },
+        "追蹤者的": { type: "top",   slots: ["ring","ring2"],       stats: { bal: 7  } },
         //戒指字尾
+        "命運":     { type: "end",   slots: ["ring","ring2","belt"],       stats: { atk: 400, bal: 4, crit: 4 } } ,
         "神秘":     { type: "end",   slots: ["ring","ring2"],       stats: { atk: 200, bal: 2, crit: 2 } } ,
         //胸針字首
         "超越的":   { type: "top",   slots: ["jewelry"],            stats: { atk: 600, speed: 1, crit: 2, bal:2, force: 150 } },
@@ -338,10 +412,16 @@ export default function handler(req, res) {
         //銀輪字尾
         "衝突":     { type: "end",   slots: ["compass"],            stats: { crit: 2 } },
         //精靈石
+        "暴擊+3":   { type: "stone", 
+                      slots: ["earring","necklace","weapon","totem","belt","jewelry","ring","ring2"], stats: { crit: 3 } },
+        "平衡+3":   { type: "stone", 
+                      slots: ["earring","necklace","weapon","totem","belt","jewelry","ring","ring2"], stats: { bal: 3 } },
         "暴擊+2":   { type: "stone", 
                       slots: ["earring","necklace","weapon","totem","belt","jewelry","ring","ring2"], stats: { crit: 2 } },
         "平衡+2":   { type: "stone", 
                       slots: ["earring","necklace","weapon","totem","belt","jewelry","ring","ring2"], stats: { bal: 2 } },
+        "攻速+1":   { type: "stone", 
+                      slots: ["earring","necklace","weapon","totem","belt","jewelry","ring","ring2"], stats: { speed: 1 } },
         },
 
         setDb: { 
@@ -352,6 +432,10 @@ export default function handler(req, res) {
         },
 
         pairDb: { 
+        "120套裝": { 
+            slots: [ "ring", "ring2"],
+            items: [ "沉默的證明", "寂靜的證明"], 
+            bonus: { crit: 3 } },
         "115套裝": { 
             slots: [ "ring", "ring2"],
             items: [ "暗之暈", "暗之影"], 
