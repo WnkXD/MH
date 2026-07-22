@@ -469,6 +469,7 @@
         font-size:13px; font-family:inherit;">
         💾 儲存配置
     </button>
+    <div id="saveList" style="display:flex;flex-direction:column;gap:2px;"></div>
 </aside>
 
 <main class="main-content" id="mainArea">
@@ -807,6 +808,7 @@
         });
         renderRaidList({ atk: 0, def: 0, crit: 0, bal: 0, pen: 0, speed: 0 });
         loadConfig();
+        renderSaveList();
     }
 
     loadData();
@@ -1389,19 +1391,88 @@
 
     //儲存裝備內容
     function saveConfig() {
+        const name = prompt('請輸入存檔名稱：', `配置 ${new Date().toLocaleDateString()}`);
+        if (!name) return;
+
         const baseValues = {};
         ['base-atk','base-crit','base-def','base-agi','base-wil'].forEach(id => {
             baseValues[id] = document.getElementById(id).value;
         });
         baseValues['magic-mode'] = document.getElementById('magic-mode').checked;
 
-        localStorage.setItem('equipSave', JSON.stringify({
-            equippedState,
-            baseValues,
-        }));
-        alert('已儲存！');
+        const allSaves = JSON.parse(localStorage.getItem('equipSaves') || '{}');
+        allSaves[name] = { equippedState, baseValues, savedAt: new Date().toLocaleString() };
+        localStorage.setItem('equipSaves', JSON.stringify(allSaves));
+    
+        renderSaveList();
+        alert(`已儲存「${name}」！`);
     }
 
+    //讀取特定存檔
+    function loadConfig(name) {
+        const allSaves = JSON.parse(localStorage.getItem('equipSaves') || '{}');
+        const save = allSaves[name];
+        if (!save) return;
+
+        Object.entries(save.baseValues).forEach(([id, val]) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            if (el.type === 'checkbox') el.checked = val;
+            else el.value = val;
+        });
+
+        Object.keys(save.equippedState).forEach(slot => {
+            if (equippedState[slot] !== undefined) {
+                equippedState[slot] = save.equippedState[slot];
+                const slotEl = document.querySelector(`.grid-item[data-type="${slot}"]`);
+                if (slotEl && equippedState[slot].name) {
+                    const item = itemDb[slot]?.find(i => i.name === equippedState[slot].name);
+                    if (item) {
+                        const imgEl = slotEl.querySelector('img');
+                        imgEl.src = item.img;
+                        imgEl.style.display = 'block';
+                        updateSlotRarityBorder(slotEl, equippedState[slot].rarity);
+                    }
+                }
+            }
+        });
+
+        calculateTotal();
+        alert(`已讀取「${name}」！`);
+    }
+
+    //刪除存檔
+    function deleteConfig(name) {
+        if (!confirm(`確定刪除「${name}」？`)) return;
+        const allSaves = JSON.parse(localStorage.getItem('equipSaves') || '{}');
+        delete allSaves[name];
+        localStorage.setItem('equipSaves', JSON.stringify(allSaves));
+        renderSaveList();
+    }
+    //存檔清單
+    function renderSaveList() {
+        const allSaves = JSON.parse(localStorage.getItem('equipSaves') || '{}');
+        const container = document.getElementById('saveList');
+        const names = Object.keys(allSaves);
+    
+        if (names.length === 0) {
+            container.innerHTML = '<span style="font-size:12px;color:#555;">尚無存檔</span>';
+            return;
+        }
+
+        container.innerHTML = names.map(name => `
+            <div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid #2e2e2e;">
+                <span style="flex:1;font-size:12px;color:#ccc;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
+                      title="${allSaves[name].savedAt}">${name}</span>
+                <button onclick="loadConfig('${name}')" style="
+                    padding:2px 8px;background:#2a2a2a;color:#0af;border:1px solid #3a3a3a;
+                    border-radius:4px;cursor:pointer;font-size:11px;">讀取</button>
+                <button onclick="deleteConfig('${name}')" style="
+                    padding:2px 8px;background:#2a2a2a;color:#f44;border:1px solid #3a3a3a;
+                    border-radius:4px;cursor:pointer;font-size:11px;">刪除</button>
+            </div>
+        `).join('');
+    }
     // ══════════════════════════════════════════
     //  事件
     // ══════════════════════════════════════════
