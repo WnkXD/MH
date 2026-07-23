@@ -1304,8 +1304,8 @@
         // 統一跑迴圈修正 total 物件
         Object.keys(total).forEach(k => {
             if (ceilStats.includes(k))  total[k] = Math.ceil(total[k] || 0);
-            if (floorStats.includes(k)) total[k] = Math.floor(total[k] || 0);
-            if (roundStats.includes(k)) total[k] = Math.round(total[k] || 0);
+            else if (floorStats.includes(k)) total[k] = Math.floor(total[k] || 0);
+            else if (roundStats.includes(k)) total[k] = Math.round(total[k] || 0);
         });
 
         return total;
@@ -1313,12 +1313,12 @@
 
     function calculateTotal() {
         const total = getCurrentTotal();
-        document.getElementById('total-atk').innerText   = total.atk.toFixed(1);
+        document.getElementById('total-atk').innerText   = total.atk;
         document.getElementById('total-speed').innerText = total.speed;
-        document.getElementById('total-crit').innerText  = total.crit.toFixed(1);
+        document.getElementById('total-crit').innerText  = total.crit;
         document.getElementById('total-bal').innerText   = total.bal;
         document.getElementById('total-force').innerText = total.force;
-        document.getElementById('total-def').innerText   = total.def.toFixed(1);
+        document.getElementById('total-def').innerText   = total.def;
         document.getElementById('total-pen').innerText   = total.pen;
         renderRaidList(total);
 
@@ -1358,36 +1358,6 @@
                 }).join('');
         document.getElementById('raidDetail').style.display = 'block';
     }
-
-    /*function openRaidDetail(name) {
-        const raid  = raidDb.find(r => r.name === name);
-        const total = getCurrentTotal();
-        document.getElementById('raidDetailName').innerText = name;
-        document.getElementById('raidDetailBody').innerHTML =
-            Object.keys(raid.require)
-                .filter(k => raid.require[k] > 0)
-                .map(k => {
-                    let val = total[k] || 0;
-
-                    // 💡 依據屬性類別進行手動進位/捨去修正
-                    if (['atk', 'def', 'crit'].includes(k)) {
-                        val = Math.ceil(val);  // 無條件進位
-                    } else if (k === 'bal') {
-                        val = Math.floor(val); // 無條件捨去
-                    } else {
-                        val = Math.floor(val); // 其他屬性預設捨去（也可依需要微調）
-                    }
-
-                    // 用修正後的 val 來比對門檻
-                    const ok = val >= raid.require[k];
-
-                    return `<div class="raid-stat-row ${ok ? 'ok' : 'shortage'}">
-                        <span class="label">${labels[k]}</span>
-                        <span class="values">${val} / ${raid.require[k]}</span>
-                    </div>`;
-                }).join('');
-        document.getElementById('raidDetail').style.display = 'block';
-    }*/
 
     function updateDetailTitle() {
         const state = equippedState[currentType];
