@@ -1294,6 +1294,20 @@
         const extraWil = totalWil - baseWil;
         total.crit += extraWil * 0.0075;
 
+        // ══════════════════════════════════════════
+        //  ★ 數值進位/捨去統一定義（回傳前處理）
+        // ══════════════════════════════════════════
+        const ceilStats  = ['atk', 'def', 'crit']; // 無條件進位
+        const floorStats = ['bal', 'speed', 'force']; // 無條件捨去
+        const roundStats = ['str', 'agi', 'wil', 'int', 'pen']; // 四捨五入
+
+        // 統一跑迴圈修正 total 物件
+        Object.keys(total).forEach(k => {
+            if (ceilStats.includes(k))  total[k] = Math.ceil(total[k] || 0);
+            if (floorStats.includes(k)) total[k] = Math.floor(total[k] || 0);
+            if (roundStats.includes(k)) total[k] = Math.round(total[k] || 0);
+        });
+
         return total;
     }
 
@@ -1328,7 +1342,7 @@
         }).join('');
     }
 
-    /*function openRaidDetail(name) {
+    function openRaidDetail(name) {
         const raid  = raidDb.find(r => r.name === name);
         const total = getCurrentTotal();
         document.getElementById('raidDetailName').innerText = name;
@@ -1343,9 +1357,9 @@
                     </div>`;
                 }).join('');
         document.getElementById('raidDetail').style.display = 'block';
-    }*/
+    }
 
-    function openRaidDetail(name) {
+    /*function openRaidDetail(name) {
         const raid  = raidDb.find(r => r.name === name);
         const total = getCurrentTotal();
         document.getElementById('raidDetailName').innerText = name;
@@ -1373,7 +1387,7 @@
                     </div>`;
                 }).join('');
         document.getElementById('raidDetail').style.display = 'block';
-    }
+    }*/
 
     function updateDetailTitle() {
         const state = equippedState[currentType];
