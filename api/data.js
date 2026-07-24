@@ -383,6 +383,7 @@ export default function handler(req, res) {
         "古代的":   { type: "top",   slots: ["belt"],              stats: { speed: 1, crit: 4, bal: 2 } } ,
         "強烈的":   { type: "top",   slots: ["belt"],              stats: { speed: 1, crit: 3, bal: 1 } } ,
         //腰帶字尾
+        "暴怒":   { type: "end",   slots: ["earring","necklace","belt","ring","ring2","jewelry"],stats: { def:400 } } ,
         //飾品字首
         "狂風的":   { type: "top",   slots: ["earring","necklace","belt","ring","ring2","jewelry"],stats: { atk:700,speed:5, crit:-4, bal:-4 } } ,
         "隱藏的":   { type: "top",   slots: ["earring","necklace"], stats: { atk: 700, speed: 1 } },
