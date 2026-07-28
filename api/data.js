@@ -283,6 +283,13 @@ export default function handler(req, res) {
             upgrade: { 0:{}, 20:{atk:280,pen:90} } },
         ],
 
+        artifact: [
+            { name: "注視者的完整技能道具", img: "/accessory/artifact/13-final.png", stats: { atk: 1000, bal: 5 } },
+            { name: "注視者的閃亮技能道具", img: "/accessory/artifact/13-purple.png",stats: { atk: 1000, bal: 3 } },
+            { name: "注視者的技能道具"    , img: "/accessory/artifact/13-blue.png",  stats: { atk: 500 , bal: 3 } },
+            { name: "注視者的生鏽技能道具", img: "/accessory/artifact/13-green.png", stats: { atk: 500 , bal: 1 } },
+        ],
+
         ring2: [
             { name: "必滅枷鎖", img: "/accessory/ring/125-1.png", stats: { bal: 9, crit: 8, str: 140, agi:70, int: 180, wil: 80 },
               upgrade: { 0:{},
@@ -315,20 +322,8 @@ export default function handler(req, res) {
             { name: "暗之影", img: "/accessory/ring/115-2.png", stats: { bal: 5,  crit: 6, str: 140, agi: 70, int: 180, wil: 80 },
             upgrade: { 0:{}, 20:{atk:280,pen:90} } },
         ],
-
-        artifact: [
-            { name: "注視者的完整技能道具", img: "/accessory/artifact/13-final.png", stats: { atk: 1000, bal: 5 } },
-            { name: "注視者的閃亮技能道具", img: "/accessory/artifact/13-purple.png",stats: { atk: 1000, bal: 3 } },
-            { name: "注視者的技能道具"    , img: "/accessory/artifact/13-blue.png",  stats: { atk: 500 , bal: 3 } },
-            { name: "注視者的生鏽技能道具", img: "/accessory/artifact/13-green.png", stats: { atk: 500 , bal: 1 } },
-        ],
         
         bracelet: [
-            { name: "君主的完整黑曜石手環", img: "/accessory/bracelet/5.png", stats: { atk: 1000, crit: 5 }, gemSlots: 4, gemStatCount: 2 },
-            { name: "未知的黃金手環"     , img: "/accessory/bracelet/1.png", gemSlots: 4, gemStatCount: 2 }, 
-        ],
-
-        bracelet2: [
             { name: "君主的完整黑曜石手環", img: "/accessory/bracelet/5.png", stats: { atk: 1000, crit: 5 }, gemSlots: 4, gemStatCount: 2 },
             { name: "未知的黃金手環"     , img: "/accessory/bracelet/1.png", gemSlots: 4, gemStatCount: 2 }, 
         ],
@@ -338,6 +333,11 @@ export default function handler(req, res) {
             { name: "墮落者的閃亮銀輪", img: "/accessory/compass/7.png", stats: { atk: 1000 , crit: 7 } },
             { name: "墮落者的銀輪"    , img: "/accessory/compass/6.png", stats: { atk: 1000 , crit: 7 } },
             { name: "墮落者的生鏽銀輪", img: "/accessory/compass/5.png", stats: { atk: 1000 , crit: 5  } }, 
+        ],
+
+        bracelet2: [
+            { name: "君主的完整黑曜石手環", img: "/accessory/bracelet/5.png", stats: { atk: 1000, crit: 5 }, gemSlots: 4, gemStatCount: 2 },
+            { name: "未知的黃金手環"     , img: "/accessory/bracelet/1.png", gemSlots: 4, gemStatCount: 2 }, 
         ],
 
         },
@@ -383,7 +383,7 @@ export default function handler(req, res) {
         "古代的":   { type: "top",   slots: ["belt"],              stats: { speed: 1, crit: 4, bal: 2 } } ,
         "強烈的":   { type: "top",   slots: ["belt"],              stats: { speed: 1, crit: 3, bal: 1 } } ,
         //腰帶字尾
-        "暴怒":   { type: "end",   slots: ["earring","necklace","belt","ring","ring2","jewelry"],stats: { def:400 } } ,
+        "暴怒":     { type: "end",   slots: ["earring","necklace","belt","ring","ring2","jewelry"],stats: { def:400 } } ,
         //飾品字首
         "狂風的":   { type: "top",   slots: ["earring","necklace","belt","ring","ring2","jewelry"],stats: { atk:700,speed:5, crit:-4, bal:-4 } } ,
         "隱藏的":   { type: "top",   slots: ["earring","necklace"], stats: { atk: 700, speed: 1 } },

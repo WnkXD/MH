@@ -473,6 +473,15 @@
 </aside>
 
 <main class="main-content" id="mainArea">
+    <div id="overviewPanel" style="
+        min-width:270px; flex-shrink:0;
+        background:#1c1c1c; border:1px solid #2e2e2e;
+        border-radius:14px; padding:16px;
+        display:flex; flex-direction:column; gap:8px;
+        overflow-y:auto; height:calc(100vh - 60px);">
+    </div>
+
+    <div id="itemTooltip"></div>
     <div class="grid-wrapper">
         <div class="grid-container" id="gridContainer">
 
@@ -679,8 +688,6 @@
             <div id="raidDetailBody"></div>
         </div>
     </div>
-
-    <div id="itemTooltip"></div>
 </main>
 
 
@@ -1327,6 +1334,79 @@
         if (raidDetail.style.display === 'block' && raidDetailName.innerText) {
             openRaidDetail(raidDetailName.innerText);
         }
+        renderOverview();
+    }
+
+    // ══════════════════════════════════════════
+    //  ★ 裝備數值預覽
+    // ══════════════════════════════════════════
+    function renderOverview() {
+        const panel = document.getElementById('overviewPanel');
+        if (!panel) return;
+
+        const rarityLabelMap = { '':'', white:'', green:'初級', blue:'中級', purple:'高級', orange:'稀有', red:'傳說' };
+
+        const rarityColorMap = {
+            white:  '#e0e0e0;',// 普通 - 白
+            green:  '#5BC668', // 初級 - 綠
+            blue:   '#2196f3', // 中級 - 藍
+            purple: '#9c27b0', // 高級 - 紫
+            orange: '#ff9800', // 稀有 - 橘
+            red:    '#f44336'  // 傳說 - 紅
+        };
+
+        const rows = Object.keys(equippedState).map(slot => {
+            const state = equippedState[slot];
+            if (!state || !state.name) return '';
+
+            const currentColor = rarityColorMap[state.rarity] || '#ffffff';
+
+            // 1. 強化等級 (+20) -> 亮黃色
+            const lvl = Number(state.upgradeLevel) || 0;
+            const upgradeLabel = lvl > 0 
+                ? `<span style="color: #ffe600; font-weight: bold;">+${lvl}</span>` 
+                : '';
+
+            // 2. 石頭 -> 橘色
+            const stoneContent = state.stone 
+                ? `<span style="color: #4F7F87;">(${state.stone})</span>` 
+                : '';
+
+            // 3. 附魔 (前綴 / 後綴) -> 亮綠色
+            const topText = state.top 
+                ? `<span style="color: #55ff55;">${state.top}</span>` 
+                : '';
+            const endText = state.end 
+                ? `<span style="color: #55ff55;">${state.end}</span>` 
+                : '';
+
+            // 4. 稀有度 -> 紫粉色 (或依品質動態換色)
+            const rarityRaw = rarityLabelMap[state.rarity] || '';
+            const rarityColor = rarityColorMap[state.rarity] || '#ffffff';
+            const rarityText = rarityRaw
+                ? `<span style="color: ${rarityColor}; font-weight: bold;">${rarityRaw}</span>` 
+                : '';
+
+            // 5. 裝備名稱 -> 淺灰色/白色預設值
+            const nameText = `<span style="color: ${currentColor}; font-weight: bold;">${state.name}</span>`;
+            // 組合右側的主要文字區域
+            const mainDetails = [topText, endText, rarityText, upgradeLabel, nameText].filter(Boolean).join(' ');
+
+            // 💡 關鍵排版：左右分開 + 固定左邊寬度
+            return `<div style="display:flex; align-items:center; font-size:14px; padding:6px 0; border-bottom:1px solid #252525;">
+                <!-- 左欄：石頭（設定固定寬度 90px 可視文字長度自行微調 -->
+                <div style="width: 70px; flex-shrink: 0; white-space: nowrap;">
+                    ${stoneContent}
+                </div>
+            
+                <!-- 右欄：其餘裝備細節 -->
+                <div style="flex-grow: 1;">
+                    ${mainDetails}
+                </div>
+            </div>`;
+        }).filter(Boolean).join('');
+
+        panel.innerHTML = rows || '<span style="font-size:16px;color:#555;">尚未裝備任何裝備</span>';
     }
 
     // ══════════════════════════════════════════
@@ -1469,6 +1549,16 @@
     });
 
     renderRaidList({ atk: 0, def: 0, crit: 0, bal: 0, pen: 0, speed: 0 });
+
+    // 網頁全部載入完成後，自動執行一次初始化
+    document.addEventListener('DOMContentLoaded', () => {
+        // 1. 如果有存檔，先讀取存檔
+        if (typeof loadConfig === 'function') {
+            loadConfig();
+        }
+    
+        calculateTotal();
+    });
 </script>
 </body>
 </html>
