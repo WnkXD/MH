@@ -438,6 +438,26 @@
             flex-shrink: 0;
         }
         .refine-btn:hover { border-color: #555; color: #fff; }
+
+        /* 裝備列表單行容器 */
+        .equip-row-item {
+            display: flex !important;      /* 強制維持左右 Flex 排版 */
+            align-items: center;
+            font-size: 14px;
+            padding: 6px 8px;
+            border-bottom: 1px solid #252525;
+            transition: all 0.15s ease-in-out;
+            cursor: pointer;
+            box-sizing: border-box;
+            pointer-events: none;
+        }
+
+        .equip-row-item:hover,
+        .equip-row-item.active-selecting {
+            background-color: rgba(219, 199, 95, 0.15) !important; /* 顯眼的淡黃色高亮 */
+            box-shadow: 0 0 12px rgba(255, 230, 0, 0.2);           /* 發光效果 */
+            transform: translateX(6px);                            /* 向右位移突顯 */
+        }
     </style>
 </head>
 <body>
@@ -866,6 +886,8 @@
         currentSlotEl = el;
         currentType = el.dataset.type;
 
+        renderOverview();  //hovor效果
+
         const items = itemDb[currentType] || [];
 
         const itemOptions = items.map((item, i) =>
@@ -899,6 +921,7 @@
     function closeTooltip() {
         document.getElementById('itemTooltip').style.display = 'none';
         if (currentSlotEl) currentSlotEl.classList.remove('active-slot');
+        renderOverview(); //關閉hovor
     }
 
     function selectItem(idx) {
@@ -920,6 +943,7 @@
         calculateTotal();
         updateDetailTitle()
         equippedState[currentType].star = 2;
+        renderOverview();  //hovor效果
     }
 
     function openEnchantDirect(el) {
@@ -932,6 +956,7 @@
         currentSlotEl = el;
         showDetail(equippedState[currentType].name);
         renderRefinePanel(currentType);
+        renderOverview();  //hovor效果
     }
 
     // ══════════════════════════════════════════
@@ -1347,7 +1372,7 @@
         const rarityLabelMap = { '':'', white:'', green:'初級', blue:'中級', purple:'高級', orange:'稀有', red:'傳說' };
 
         const rarityColorMap = {
-            white:  '#e0e0e0;',// 普通 - 白
+            white:  '#e0e0e0', // 普通 - 白
             green:  '#5BC668', // 初級 - 綠
             blue:   '#2196f3', // 中級 - 藍
             purple: '#9c27b0', // 高級 - 紫
@@ -1392,8 +1417,12 @@
             // 組合右側的主要文字區域
             const mainDetails = [topText, endText, rarityText, upgradeLabel, nameText].filter(Boolean).join(' ');
 
+            // 💡 判斷這行是否正在被 Tooltip 編輯中
+            const isActive = (slot === currentType);
+            const activeClass = isActive ? 'active-selecting' : '';
+
             // 💡 關鍵排版：左右分開 + 固定左邊寬度
-            return `<div style="display:flex; align-items:center; font-size:14px; padding:6px 0; border-bottom:1px solid #252525;">
+            return `<div class="equip-row-item ${activeClass}" id="overview-row-${slot}" data-slot="${slot}">
                 <!-- 左欄：石頭（設定固定寬度 90px 可視文字長度自行微調 -->
                 <div style="width: 70px; flex-shrink: 0; white-space: nowrap;">
                     ${stoneContent}
