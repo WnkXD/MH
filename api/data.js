@@ -318,9 +318,9 @@ export default function handler(req, res) {
             },
 
             { name: "暗之暈", img: "/accessory/ring/115-1.png", stats: { bal: 5,  crit: 6, str: 140, agi: 70, int: 180, wil: 80 },
-            upgrade: { 0:{}, 20:{atk:280,pen:90} } },
+            upgrade: { 0:{},18:{atk:252,pen:81},19:{atk:266,pen:85},20:{atk:280,pen:90} } },
             { name: "暗之影", img: "/accessory/ring/115-2.png", stats: { bal: 5,  crit: 6, str: 140, agi: 70, int: 180, wil: 80 },
-            upgrade: { 0:{}, 20:{atk:280,pen:90} } },
+            upgrade: { 0:{},18:{atk:252,pen:81},19:{atk:266,pen:85},20:{atk:280,pen:90} } },
         ],
         
         bracelet: [
