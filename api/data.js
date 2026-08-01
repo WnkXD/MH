@@ -392,7 +392,7 @@ export default function handler(req, res) {
         //飾品字尾
         "波動":     { type: "end",   slots: ["earring","necklace","ring","ring2","jewelry"],stats: { atk:300 } } ,
         "思念":     { type: "end",   slots: ["earring","necklace","ring","ring2","jewelry"],stats: { bal:1, def: 500 } } ,
-        "熱情":     { type: "end",   slots: ["earring","necklace","ring","ring2","jewelry"],stats: { def: 200 } } ,
+        "熱情":     { type: "end",   slots: ["earring","necklace","ring","ring2","jewelry","belt"],stats: { def: 200 } } ,
         //戒指字首
         "徬徨的":   { type: "top",   slots: ["ring","ring2"],       stats: { bal: 12 } },
         "對立的":   { type: "top",   slots: ["ring","ring2"],       stats: { bal: 9  } },
