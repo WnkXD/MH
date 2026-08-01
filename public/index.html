@@ -1329,9 +1329,9 @@
         // ══════════════════════════════════════════
         //  ★ 數值進位/捨去統一定義（回傳前處理）
         // ══════════════════════════════════════════
-        const ceilStats  = ['atk', 'def', 'crit']; // 無條件進位
+        const ceilStats  = ['def', 'crit']; // 無條件進位
         const floorStats = ['bal', 'speed', 'force']; // 無條件捨去
-        const roundStats = ['str', 'agi', 'wil', 'int', 'pen']; // 四捨五入
+        const roundStats = ['atk','str', 'agi', 'wil', 'int', 'pen']; // 四捨五入
 
         // 統一跑迴圈修正 total 物件
         Object.keys(total).forEach(k => {
