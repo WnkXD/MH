@@ -225,7 +225,7 @@ export default function handler(req, res) {
                          16:{atk:240,pen:88},17:{atk:255,pen:94},18:{atk:270,pen:99},19:{atk:285,pen:105},20:{atk:300,pen:110},
                         } },
             { name: "鬥爭腰帶", img: "/accessory/belt/1.png", stats: { bal: 8,  str: 145, agi: 95, int: 193, wil: 105 },
-              upgrade: { 0:{},20:{atk:280,pen:90} } },
+              upgrade: { 0:{},18:{atk:252,pen:81},19:{atk:266,pen:85},20:{atk:280,pen:90} } },
         ],
 
         feet: [
