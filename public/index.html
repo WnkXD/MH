@@ -378,6 +378,9 @@
         .raid-stat-row .values { font-size: 12px; }
         .raid-stat-row.ok .values { color: #00ffcc; }
         .raid-stat-row.shortage .values { color: #ff4d4d; }
+        .raid-stat-row .values1 { font-size: 12px; }
+        .raid-stat-row.ok .values1 { color: #888; }
+        .raid-stat-row.shortage .values1 { color: #ff4d4d; }
 
         .grid-wrapper {
             display: flex;
@@ -1552,7 +1555,7 @@
                             <!-- 差值靠左 -->
                             <span>${diffStr}</span>
                             <!-- 現況/門檻 靠右(套用淡灰色) -->
-                            <span style="color: #888; font-size: 11px;">(${total[k]} / ${raid.require[k]})</span>
+                            <span class="values1">(${total[k]} / ${raid.require[k]})</span>
                         </div>
                     </div>`;
                 }).join('');
