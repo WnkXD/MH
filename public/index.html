@@ -326,7 +326,7 @@
 
         /* ── Raid Panel ── */
         .raid-panel {
-            width: 500px;
+            width: 400px;
             flex-shrink: 0;
             background: #1c1c1c;
             border: 1px solid #2e2e2e;
@@ -337,6 +337,7 @@
             gap: 8px;
             overflow-y: auto;
         }
+
         .raid-panel h2 { font-size: 13px; color: #888; font-weight: 600; letter-spacing: 0.05em; flex-shrink: 0; }
 
         .raid-item {
@@ -352,7 +353,7 @@
         .raid-item.fail { color: #ff4d4d; cursor: pointer; }
         .raid-item.fail:hover { background: rgba(255,77,77,0.12); }
 
-        #raidList { width: 200px; flex-shrink: 0; }
+        #raidList { width: 170px; flex-shrink: 0; }
 
         .raid-detail {
             flex: 1;
@@ -702,7 +703,17 @@
 
     <!-- Raid Panel -->
     <div class="raid-panel">
-        <div id="raidList"></div>
+        <div class="raid-sidebar">
+            <!-- 上半部：一般副本列表 -->
+            <div class="raid-section-title">Raid</div>
+            <div id="raidList"></div>
+
+            <!-- 中間標題 -->
+            <div class="raid-section-title" style="margin-top: 14px;">時空扭曲</div>
+
+            <!-- 🔹 下半部：時空扭曲副本列表 -->
+            <div id="stdList"></div>
+        </div>
         <div class="raid-detail" id="raidDetail">
             <h3 id="raidDetailName"></h3>
             <div id="raidDetailBody"></div>
@@ -739,13 +750,18 @@
     let setDb = {};
 
     const raidDb = [
-        { name: "扭曲的懺悔",        require: { atk: 54290, def: 32130, crit: 284, bal: 144, force: 7250, pen: 285 } },
-        { name: "貪婪的宴會廳",      require: { atk: 56920, def: 32830, crit: 290, bal: 152, force: 7350, pen: 300 } },
-        { name: "無法遵循的預言",    require: { atk: 57620, def: 33530, crit: 300, bal: 160, force: 7450, pen: 315 } },
-        { name: "遺忘正義的大教堂",  require: { atk: 58120, def: 34250, crit: 312, bal: 168, force: 7550, pen: 330 } },
-        { name: "豐饒之森",         require: { atk: 60120, def: 36250, crit: 322, bal: 178, force: 7750, pen: 350 } },
-        { name: "天地交會之處",      require: { atk: 63120, def: 37750, crit: 337, bal: 190, force: 8200, pen: 370 } },
-        { name: "黃金樹丘陵",        require: { atk: 66120, def: 39750, crit: 354, bal: 202, force: 8650, pen: 390 } },
+        // Raid
+        { type: "raid", name: "扭曲的懺悔",        require: { atk: 54290, def: 32130, crit: 284, bal: 144, force: 7250, pen: 285 } },
+        { type: "raid", name: "貪婪的宴會廳",      require: { atk: 56920, def: 32830, crit: 290, bal: 152, force: 7350, pen: 300 } },
+        { type: "raid", name: "無法遵循的預言",    require: { atk: 57620, def: 33530, crit: 300, bal: 160, force: 7450, pen: 315 } },
+        { type: "raid", name: "遺忘正義的大教堂",  require: { atk: 58120, def: 34250, crit: 312, bal: 168, force: 7550, pen: 330 } },
+        { type: "raid", name: "豐饒之森",         require: { atk: 60120, def: 36250, crit: 322, bal: 178, force: 7750, pen: 350 } },
+        { type: "raid", name: "天地交會之處",      require: { atk: 63120, def: 37750, crit: 337, bal: 190, force: 8200, pen: 370 } },
+        { type: "raid", name: "黃金樹丘陵",        require: { atk: 66120, def: 39750, crit: 354, bal: 202, force: 8650, pen: 390 } },
+        //時空扭曲
+        { type: "std", name: "注視者的神殿",       require: { atk: 65000, def: 35000, crit: 332, bal: 172, force: 8100, pen: 370 } },
+        { type: "std", name: "篡奪者的王座",       require: { atk: 74000, def: 43000, crit: 370, bal: 220, force: 9350, pen: 460 } },
+
     ];
 
     const labels = { atk:'攻擊力', def:'防禦力', crit:'暴擊率', bal:'平衡', force:'追加傷害', 
@@ -1441,14 +1457,25 @@
     // ══════════════════════════════════════════
     //  Raid
     // ══════════════════════════════════════════
-    function renderRaidList(total) {
-        const list = document.getElementById('raidList');
-        list.innerHTML = raidDb.map(raid => {
+    function renderRaidListGroup(total, type = 'normal', containerId = 'raidList') {
+        const list = document.getElementById(containerId);
+        if (!list) return;
+
+        // 關鍵：用 .filter 只抓出符合該 type 的副本
+        const filteredRaids = raidDb.filter(raid => raid.type === type);
+
+        list.innerHTML = filteredRaids.map(raid => {
             const pass = Object.keys(raid.require).every(k => total[k] >= raid.require[k]);
             return `<div class="raid-item ${pass ? 'pass' : 'fail'}" onclick="openRaidDetail('${raid.name}')">
                 ${raid.name}
             </div>`;
         }).join('');
+    }
+
+    // 🔹 一次渲染所有區塊（一般 + 時空）
+    function renderRaidList(total) {
+        renderRaidListGroup(total, 'raid', 'raidList');      // 渲染一般副本
+        renderRaidListGroup(total, 'std',  'stdList' );      // 渲染時空扭曲
     }
 
     function openRaidDetail(name) {
