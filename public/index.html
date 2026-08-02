@@ -713,6 +713,18 @@
 
             <!-- 🔹 下半部：時空扭曲副本列表 -->
             <div id="stdList"></div>
+            <!-- BUFF 扣除/加成設定區 -->
+            <div class="buff-toggle-group" style="margin-top: 14px;">
+                <label class="buff-checkbox">
+                    <input type="checkbox" id="chk-vvip" onchange="calculateTotal()" checked>
+                    扣掉VVIP加成
+                </label>
+                <br>
+                <label class="buff-checkbox">
+                    <input type="checkbox" id="chk-expedition" onchange="calculateTotal()" checked>
+                    扣掉遠征隊加成
+                </label>
+            </div>
         </div>
         <div class="raid-detail" id="raidDetail">
             <h3 id="raidDetailName"></h3>
@@ -1454,12 +1466,36 @@
         panel.innerHTML = rows || '<span style="font-size:16px;color:#555;">尚未裝備任何裝備</span>';
     }
 
+    // 🔹 專門給「時空扭曲」使用的數值計算
+    function getStdTotal(baseTotal) {
+        // 複製一份數值，避免改到原始 total
+        let stdTotal = { ...baseTotal };
+
+        const isVvip = document.getElementById('chk-vvip')?.checked;
+        const isExpedition = document.getElementById('chk-expedition')?.checked;
+
+        if (isVvip) {
+            stdTotal.atk -= 209;
+        }
+
+        if (isExpedition) {
+            stdTotal.atk  -= 500;
+            stdTotal.def  -= 300;
+            stdTotal.crit -= 1;
+        }
+
+        return stdTotal;
+    }
+
     // ══════════════════════════════════════════
     //  Raid
     // ══════════════════════════════════════════
     function renderRaidListGroup(total, type = 'normal', containerId = 'raidList') {
         const list = document.getElementById(containerId);
         if (!list) return;
+
+        // 關鍵：如果是時空扭曲('std')，就帶入扣除 BUFF 後的數值；一般副本則用原始 total
+        const effectiveTotal = (type === 'std') ? getStdTotal(total) : total;
 
         // 關鍵：用 .filter 只抓出符合該 type 的副本
         const filteredRaids = raidDb.filter(raid => raid.type === type);
@@ -1480,7 +1516,12 @@
 
     function openRaidDetail(name) {
         const raid  = raidDb.find(r => r.name === name);
-        const total = getCurrentTotal();
+        if (!raid) return;
+
+        const rawTotal = getCurrentTotal();
+
+        // 2. 判斷如果是時空扭曲副本(type === 'std')，就扣除 BUFF
+        const total = (raid.type === 'std') ? getStdTotal(rawTotal) : rawTotal;
         document.getElementById('raidDetailName').innerText = name;
 
         document.getElementById('raidDetailBody').innerHTML =
