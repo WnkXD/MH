@@ -326,7 +326,7 @@
 
         /* ── Raid Panel ── */
         .raid-panel {
-            width: 400px;
+            width: 450px;
             flex-shrink: 0;
             background: #1c1c1c;
             border: 1px solid #2e2e2e;
@@ -1482,14 +1482,18 @@
         const raid  = raidDb.find(r => r.name === name);
         const total = getCurrentTotal();
         document.getElementById('raidDetailName').innerText = name;
+
         document.getElementById('raidDetailBody').innerHTML =
             Object.keys(raid.require)
                 .filter(k => raid.require[k] > 0)
                 .map(k => {
-                    const ok = total[k] >= raid.require[k];
+                    const diff = total[k] - raid.require[k]; // 🔹 計算差值 (玩家數值 - 門檻)
+                    const ok = diff >= 0;                     // 🔹 差值 >= 0 代表達標
+                    // 🔹 格式化顯示：正數加上 '+' 號，負數自帶 '-' 號
+                    const diffStr = diff > 0 ? `+${diff}` : `${diff}`;
                     return `<div class="raid-stat-row ${ok ? 'ok' : 'shortage'}">
                         <span class="label">${labels[k]}</span>
-                        <span class="values">${total[k]} / ${raid.require[k]}</span>
+                        <span class="values">${diffStr} (${total[k]} / ${raid.require[k]})</span>
                     </div>`;
                 }).join('');
         document.getElementById('raidDetail').style.display = 'block';
