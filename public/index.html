@@ -457,7 +457,6 @@
         .equip-row-item.active-selecting {
             background-color: rgba(219, 199, 95, 0.15) !important; /* 顯眼的淡黃色高亮 */
             box-shadow: 0 0 12px rgba(255, 230, 0, 0.2);           /* 發光效果 */
-            transform: translateX(6px);                            /* 向右位移突顯 */
         }
     </style>
 </head>
@@ -725,10 +724,10 @@
     </div>
 
     <div id="overviewPanel" style="
-        min-width:340px; flex-shrink:0;
+        min-width:400px; flex-shrink:0;
         background:#1c1c1c; border:1px solid #2e2e2e;
-        border-radius:14px; padding:16px;
-        display:flex; flex-direction:column; gap:8px;
+        border-radius:14px; padding:2px;
+        display:flex; flex-direction:column; gap:10px;
         overflow-y:auto; height:calc(100vh - 60px);">
     </div>
 </main>
@@ -1414,23 +1413,23 @@
 
             const currentColor = rarityColorMap[state.rarity] || '#ffffff';
 
-            // 1. 強化等級 (+20) -> 亮黃色
-            const lvl = Number(state.upgradeLevel) || 0;
-            const upgradeLabel = lvl > 0 
-                ? `<span style="color: #ffe600; font-weight: bold;">+${lvl}</span>` 
-                : '';
-
-            // 2. 石頭 -> 橘色
+            // 1. 精靈石 -> 橘色
             const stoneContent = state.stone 
                 ? `<span style="color: #4F7F87;">(${state.stone})</span>` 
                 : '';
-
-            // 3. 附魔 (前綴 / 後綴) -> 亮綠色
+            
+            // 2. 附魔 (前綴 / 後綴) -> 亮綠色
             const topText = state.top 
-                ? `<span style="color: #55ff55;">${state.top}</span>` 
+                ? `<span style="color: #55ff55;">${state.top}</span>`
                 : '';
             const endText = state.end 
                 ? `<span style="color: #55ff55;">${state.end}</span>` 
+                : '';
+            
+            // 3. 強化等級 (+20) -> 亮黃色
+            const lvl = Number(state.upgradeLevel) || 0;
+            const upgradeLabel = lvl > 0 
+                ? `<span style="color: #ffe600; font-weight: bold;">+${lvl}</span>` 
                 : '';
 
             // 4. 稀有度 -> 紫粉色 (或依品質動態換色)
@@ -1443,21 +1442,32 @@
             // 5. 裝備名稱 -> 淺灰色/白色預設值
             const nameText = `<span style="color: ${currentColor}; font-weight: bold;">${state.name}</span>`;
             // 組合右側的主要文字區域
-            const mainDetails = [topText, endText, rarityText, upgradeLabel, nameText].filter(Boolean).join(' ');
+            const mainDetails = [ rarityText, upgradeLabel, nameText].filter(Boolean).join(' ');
 
             // 💡 判斷這行是否正在被 Tooltip 編輯中
             const isActive = (slot === currentType);
             const activeClass = isActive ? 'active-selecting' : '';
 
-            // 💡 關鍵排版：左右分開 + 固定左邊寬度
+            // 💡 關鍵三欄式 Flex 排版 (石頭 | 附魔 | 裝備名稱)
             return `<div class="equip-row-item ${activeClass}" id="overview-row-${slot}" data-slot="${slot}">
-                <!-- 左欄：石頭（設定固定寬度 90px 可視文字長度自行微調 -->
-                <div style="width: 70px; flex-shrink: 0; white-space: nowrap;">
+            
+                <!-- 欄位 1 精靈石 (固定寬度 70px) -->
+                <div style="width: 60px; margin-right: 8px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                     ${stoneContent}
                 </div>
-            
-                <!-- 右欄：其餘裝備細節 -->
-                <div style="flex-grow: 1;">
+
+                <!-- 欄位 2 附魔 top -->
+                <div style="width: 80px; margin-right: 8px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    ${topText}
+                </div>
+
+                <!-- 欄位 3 附魔 end -->
+                <div style="width: 60px; margin-right: 8px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    ${endText}
+                </div>
+
+                <!-- 欄位 3 裝備本體 (吃滿右邊剩餘空間，自動靠左齊) -->
+                <div style="flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                     ${mainDetails}
                 </div>
             </div>`;
