@@ -1542,9 +1542,18 @@
                     const ok = diff >= 0;                     // 🔹 差值 >= 0 代表達標
                     // 🔹 格式化顯示：正數加上 '+' 號，負數自帶 '-' 號
                     const diffStr = diff > 0 ? `+${diff}` : `${diff}`;
+
                     return `<div class="raid-stat-row ${ok ? 'ok' : 'shortage'}">
-                        <span class="label">${labels[k]}</span>
-                        <span class="values">${diffStr} (${total[k]} / ${raid.require[k]})</span>
+                        <!-- 左欄：屬性標籤 -->
+                        <span class="label" style="display: inline-block; width: 105px;">${labels[k]}</span>
+
+                        <!-- 右欄 加 inline-flex 做左右對齊 -->
+                        <div class="values" style="display: inline-flex; justify-content: space-between; align-items: center; width: 200px;">
+                            <!-- 差值靠左 -->
+                            <span>${diffStr}</span>
+                            <!-- 現況/門檻 靠右 -->
+                            <span class="values"> (${total[k]} / ${raid.require[k]})</span>
+                        </div>
                     </div>`;
                 }).join('');
         document.getElementById('raidDetail').style.display = 'block';
