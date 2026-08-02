@@ -373,14 +373,14 @@
             border-bottom: 1px solid #252525;
         }
         .raid-stat-row:last-child { border-bottom: none; }
-        .raid-stat-row.ok { color: #aaa; }
-        .raid-stat-row.shortage .label { color: #888; }
+        .raid-stat-row.ok { color: #00ffcc; }
+        .raid-stat-row.shortage .label { color: #ff4d4d; }
         .raid-stat-row .values { font-size: 12px; }
         .raid-stat-row.ok .values { color: #00ffcc; }
         .raid-stat-row.shortage .values { color: #ff4d4d; }
         .raid-stat-row .values1 { font-size: 12px; }
-        .raid-stat-row.ok .values1 { color: #00ffcc; }
-        .raid-stat-row.shortage .values1 { color: #ff4d4d; }
+        .raid-stat-row.ok .values1 { color: #888; }
+        .raid-stat-row.shortage .values1 { color: #888; }
 
         .grid-wrapper {
             display: flex;
@@ -1421,12 +1421,12 @@
                 ? `<span style="color: #4F7F87;">(${state.stone})</span>` 
                 : '';
             
-            // 2. 附魔 (前綴 / 後綴) -> 亮綠色
+            // 2. 附魔 (前綴 / 後綴) -> 橘色
             const topText = state.top 
-                ? `<span style="color: #55ff55;">${state.top}</span>`
+                ? `<span style="color: #FEB17F;">${state.top}</span>`
                 : '';
             const endText = state.end 
-                ? `<span style="color: #55ff55;">${state.end}</span>` 
+                ? `<span style="color: #FEB17F;">${state.end}</span>` 
                 : '';
             
             // 3. 強化等級 (+20) -> 亮黃色
