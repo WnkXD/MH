@@ -494,6 +494,37 @@
 </aside>
 
 <main class="main-content" id="mainArea">
+    <!-- Raid Panel -->
+    <div class="raid-panel">
+        <div class="raid-sidebar">
+            <!-- 上半部：一般副本列表 -->
+            <div class="raid-section-title">Raid</div>
+            <div id="raidList"></div>
+
+            <!-- 中間標題 -->
+            <div class="raid-section-title" style="margin-top: 14px;">時空扭曲</div>
+
+            <!-- 🔹 下半部：時空扭曲副本列表 -->
+            <div id="stdList"></div>
+            <!-- BUFF 扣除/加成設定區 -->
+            <div class="buff-toggle-group" style="margin-top: 14px;">
+                <label class="buff-checkbox">
+                    <input type="checkbox" id="chk-vvip" onchange="calculateTotal()" checked>
+                    扣掉VVIP加成
+                </label>
+                <br>
+                <label class="buff-checkbox">
+                    <input type="checkbox" id="chk-expedition" onchange="calculateTotal()" checked>
+                    扣掉遠征隊加成
+                </label>
+            </div>
+        </div>
+        <div class="raid-detail" id="raidDetail">
+            <h3 id="raidDetailName"></h3>
+            <div id="raidDetailBody"></div>
+        </div>
+    </div>
+    
     <div id="itemTooltip"></div>
     <div class="grid-wrapper">
         <div class="grid-container" id="gridContainer">
@@ -699,37 +730,6 @@
         border-radius:14px; padding:16px;
         display:flex; flex-direction:column; gap:8px;
         overflow-y:auto; height:calc(100vh - 60px);">
-    </div>
-
-    <!-- Raid Panel -->
-    <div class="raid-panel">
-        <div class="raid-sidebar">
-            <!-- 上半部：一般副本列表 -->
-            <div class="raid-section-title">Raid</div>
-            <div id="raidList"></div>
-
-            <!-- 中間標題 -->
-            <div class="raid-section-title" style="margin-top: 14px;">時空扭曲</div>
-
-            <!-- 🔹 下半部：時空扭曲副本列表 -->
-            <div id="stdList"></div>
-            <!-- BUFF 扣除/加成設定區 -->
-            <div class="buff-toggle-group" style="margin-top: 14px;">
-                <label class="buff-checkbox">
-                    <input type="checkbox" id="chk-vvip" onchange="calculateTotal()" checked>
-                    扣掉VVIP加成
-                </label>
-                <br>
-                <label class="buff-checkbox">
-                    <input type="checkbox" id="chk-expedition" onchange="calculateTotal()" checked>
-                    扣掉遠征隊加成
-                </label>
-            </div>
-        </div>
-        <div class="raid-detail" id="raidDetail">
-            <h3 id="raidDetailName"></h3>
-            <div id="raidDetailBody"></div>
-        </div>
     </div>
 </main>
 
