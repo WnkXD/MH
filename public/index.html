@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <title>裝備模擬器</title>
+    <script>
+        window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+    </script>
+    <script defer src="/_vercel/insights/script.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -1129,9 +1133,9 @@
         }
     }
 
-    // ══════════════════════════════════════════
+    // ═���════════════════════════════════════════
     //  附魔
-    // ══════════════════════════════════════════
+    // ══════════════════��═══════════════════════
     function applyEnchant(type, scrollName) {
         equippedState[currentType][type] = scrollName;
         renderScrollCard(type, scrollName);
